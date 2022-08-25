@@ -22,7 +22,7 @@ def reports(request):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         correct_timezone = get_timezone(request.user)
         page_arguments['correct_timezone'] = correct_timezone
@@ -48,7 +48,7 @@ def employee_reports(request):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         redirect('home')
     elif role == "e":
@@ -76,7 +76,7 @@ def modify_times_emp_list(request):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         page_arguments['employee_list'] = CustomUser.objects.filter(company=request.user.company).exclude(
             role="c").values('id', 'first_name', 'middle_name', 'last_name').order_by('last_name', 'first_name')
@@ -96,7 +96,7 @@ def modify_times_table(request, employee_id, selected_date=timezone.now()):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         employee = CustomUser.objects.get(id=employee_id)
         correct_timezone = get_timezone(request.user, employee)
@@ -166,7 +166,7 @@ def create_time_action(request, employee_id, selected_date=timezone.now().strfti
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         employee = CustomUser.objects.get(id=employee_id)
         if employee.company == request.user.company:
@@ -216,7 +216,7 @@ def edit_time_action(request, time_action_id):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         time_action = TimeActions(id=time_action_id)
         if time_action.user.company == request.user.company:
@@ -254,7 +254,7 @@ def delete_time_action(request, time_action_id):
     role = request.user.role
 
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         time_action = TimeActions(id=time_action_id)
         if time_action.user.company == request.user.company:

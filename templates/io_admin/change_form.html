@@ -1,0 +1,5 @@
+{% extends 'admin/change_form.html' %}
+{% block object-tools %}
+    <a href="/io_admin/users/customuser/?company__pk__exact={{ id }}" class="button">Search Company Employees </a>
+    {{ block.super }}
+{% endblock object-tools %}

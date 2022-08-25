@@ -21,7 +21,7 @@ def add_feedback(request):
 
     """Make sure that this is a valid user, and can be used later to style pages differently. by user role"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         pass
     elif role == "e":

@@ -9,7 +9,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
 from .forms import CompanyForm, EmployeeForm, AdminAccountForm, EmployeeAccountForm, OverriddenPasswordChangeForm, \
@@ -37,7 +37,7 @@ def home(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == 'e':
         options = {'i': 'o', 'o': 'i', 'b': 'e', 'e': 'o'}
         type_options = {'i': 'In', 'o': 'Out', 'b': 'On Break', 'e': 'Ended Break'}
@@ -128,7 +128,7 @@ def admin_dashboard(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         cur_page = request.GET.get('page')
         query = request.GET.get('q')
@@ -215,7 +215,7 @@ def company_settings(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         form = None
 
@@ -253,7 +253,7 @@ def create_employee(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         page_arguments['title_type'] = 'Add'
 
@@ -312,7 +312,7 @@ def edit_employee(request, employee_id):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         page_arguments['title_type'] = 'Edit'
         page_arguments['employee_id'] = employee_id
@@ -361,7 +361,7 @@ def delete_employee(request, employee_id):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         employee = CustomUser.objects.get(id=employee_id)
         if not employee == request.user:
@@ -400,7 +400,7 @@ def send_confirmation_email(request, employee_id):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         employee = CustomUser.objects.get(id=employee_id)
         if request.user.company == employee.company:
@@ -451,7 +451,7 @@ def edit_account_settings(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
 
         page = 'admin/edit_account_settings.html'
@@ -507,7 +507,7 @@ def change_password(request):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role:
         if role == 'c' or role == 'r':
             page_arguments['template'] = 'admin.html'
@@ -545,7 +545,7 @@ def admin_change_password(request, employee_id):
 
     """Checks whether the user is a timeclick employee, an employee, or an admin"""
     if request.user.is_staff:
-        return redirect('/tc_admin')
+        return redirect('/io_admin')
     elif role == "c" or role == "r":
         form = None
         employee = CustomUser.objects.get(id=employee_id)
@@ -583,7 +583,7 @@ def admin_change_password(request, employee_id):
 
 def activate(request, uidb64, token):
     try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
+        uid = force_str(urlsafe_base64_decode(uidb64))
         user = CustomUser.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None

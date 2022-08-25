@@ -42,7 +42,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 class CompanyAdmin(admin.ModelAdmin):
-    change_form_template = 'tc_admin/change_form.html'
+    change_form_template = 'io_admin/change_form.html'
     list_display = ('id', 'name', 'last_renew_date', 'created_date')
     list_filter = ('id', 'name', 'last_renew_date', 'created_date')
     search_fields = ('name',)

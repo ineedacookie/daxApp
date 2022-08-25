@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from timezone_field import TimeZoneField
 
 from .managers import CustomUserManager
@@ -33,7 +33,7 @@ class Company(models.Model):
     enable_breaks = models.BooleanField(default=True)
     breaks_are_paid = models.BooleanField(default=False, blank=True)
     include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
-    timezone = TimeZoneField(display_GMT_offset=True, null=True)
+    timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
     default_theme = models.IntegerField(blank=True, null=True)
     last_renew_date = models.DateField(blank=True, null=True)
     use_company_timezone = models.BooleanField(default=False, blank=True)
@@ -57,7 +57,7 @@ class CustomUser(AbstractUser):
     pay_rate = models.DecimalField(decimal_places=2, max_digits=6, blank=False, default=0)
     theme = models.IntegerField(default=1, blank=True, null=True)
     wp_id = models.CharField(max_length=50, help_text="Wordpress ID", blank=True, null=True)
-    timezone = TimeZoneField(display_GMT_offset=True, null=True)
+    timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
     verified = models.BooleanField(default=False, blank=True, null=True)
     created_date = models.DateField(_("Date"), auto_now_add=True, blank=True, null=True)
     time_action = models.ForeignKey('clock_actions.TimeActions', on_delete=models.SET_NULL, default=None, null=True,
