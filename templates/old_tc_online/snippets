@@ -1,0 +1,13 @@
+{{ formset.management_form }}
+        {% for form in formset %}
+            {% if form.field.tc_item.value %}
+                <tr>
+                    <td>
+                        {{ form.field.tc_item.value }}
+                    </td>
+                    <td>
+                        {{ form.field.qb_item }}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}

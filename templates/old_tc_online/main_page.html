@@ -1,0 +1,139 @@
+{% extends "base_template.html" %}
+{% load static %}
+{% block content %}
+
+<div id="msg-box" class="hidden">
+    <div class="msg-container-div">
+        <span id="notification-msg"></span>
+        <button id="confirm-btn" value="update-setup-complete">Got it!</button>
+    </div>
+</div>
+
+<div id="setup-complete" class="part-3">
+
+    <div id="wrapper">
+        <h2>Create QuickBooks Import File</h2>
+        <div id="placeholder-wrapper" class="part3">
+            <form enctype="multipart/form-data" id="submit-extract-file" method="post">
+                {% csrf_token %}
+                <table>
+                    {% for field in form %}
+                    <tr>
+                        {% if field.help_text %}
+                        <th>
+                            <small style="display: none">{{ field.help_text }}</small>
+                        </th>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <td><p style="color: red">{{ error }}</p></td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th class="upload_button">{{ field.label_tag }}</th>
+                        {% if field.exists %}
+                        <td class="visable">
+                            <img class="green-check-mark"
+                                 src="https://www.timeclick.com/payroll/resources/images/check.png"
+                                 alt="green check mark for confirmation">
+                            <p>{{ field.file }}</p>
+                            <p>Click TimeClick extract file to update. Then click match employees</p>
+                        </td>
+                        <td class="hidden">
+                            {{ field }}
+                        </td>
+                        {% else %}
+                        <td class="hidden">
+                            <img class="green-check-mark"
+                                 src="https://www.timeclick.com/payroll/resources/images/check.png"
+                                 alt="green check mark for confirmation">
+                        </td>
+                        <td class="visable">{{ field }}</td>
+                        {% endif %}
+                    </tr>
+                    {% if field.error %}
+                    <tr>
+                        <th class="error_message">
+                            Error:
+                        </th>
+                        <td class="error_message">
+                            {{ field.error }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </table>
+
+            </form>
+            <div class="center_content">
+                <button class="upload_button" form="submit-extract-file" type="submit" name="upload_file"
+                        title="Click me to upload a new extract file">Match Employees
+                </button>
+                {% if payroll_items and employee_list and timeclick_extract_file and emp_matched and items_matched%}
+                <button class="upload_button" form="submit-extract-file" type="submit" name="generate_file"
+                        title="Click me to create a QuickBooks import file">Generate QuickBooks Import File
+                </button>
+                {% else %}
+                <a class="disabled_front"
+                   title="Not quite ready to generate a file, please upload all QuickBooks files and match payroll items and employees">Generate
+                    QuickBooks Import File
+                </a>
+                {% endif %}
+                {% if export %}
+                <button class="upload_button" form="submit-extract-file" type="submit" name="download_file"
+                        title="Click me to download your QuickBooks import file">Download QuickBooks Import file
+                </button>
+                {% else %}
+                <a class="disabled_front" title="File not created yet. Please follow instructions to the right.">Download
+                    QuickBooks Import File
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+
+        <!--div id="download-report-div"></div-->
+
+
+        <div id="sidebar-instructions">
+            <h4>Instructions</h4>
+            <p>1. Upload your TimeClick Payroll Integration Report.
+                <br/>
+                <a id="helper-link-1" href="">Where do I find the Integration Report?</a>
+            </p>
+            <p>2. Once uploaded, Click match employees. the system will validate the file and check to see if
+                employee names need to be
+                matched.</p>
+            <p>3. Once step 2 is complete. Click on the button "Generate QuickBooks Import."</p>
+            <p>4. When the import file has been created you will be able to download it. Just click on the "Download
+                QuickBooks Import" button.</p>
+        </div>
+        <div id="helper-div-1" style="height: 250px;">
+            <div>
+                <h2>Finding the Payroll Integration Report:</h2>
+                <p>After opening TimeClick and running the Payroll Integration report, it is saved as a CSV file in the
+                    TimeClick Program Files directory.</p>
+                <p>The CSV file will be inside the Payroll Integration folder at this location.</p>
+                <p><strong>Default directory for LE versions:</strong> C:\Program Files(x86)\Hawkeye Technology
+                    Inc\TimeClick\Payroll_Exports</p>
+                <button class="close-btn">Done</button>
+            </div>
+        </div>
+    </div>
+    <h4>Review / Edit:</h4>
+    <hr class="btn-bar"/>
+    <div id="button-bar" class="no-margin">
+        <a class="upload_button" href="/upload" title="Review and change uploaded QuickBooks files">QuickBooks Files</a>
+        {% if payroll_items %}
+        <a class="upload_button" href="/items" title="Review and change Payroll items">Payroll Items</a>
+        {% else %}
+        <a class="disabled_front">Payroll Items</a>
+        {% endif %}
+        {% if employee_list and timeclick_extract_file %}
+        <a class="upload_button" href="/employees" title="Review and match employee names from TimeClick to QuickBooks">Employee
+            Names</a>
+        {% else %}
+        <a class="disabled_front">Employee Names</a>
+        {% endif %}
+    </div>
+</div><!-- end Software Interface Container -->
+{% endblock %}

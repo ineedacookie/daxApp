@@ -1,0 +1,157 @@
+{% extends "admin.html" %}
+{% load static %}
+
+{% block title  %}{{ title_type }} Employee{% endblock %}
+{% block header %}{{ title_type }} Employee{% endblock %}
+
+{% block content %}
+{% if title_type == 'Edit' %}
+	<div class="alert alert-info" role="alert">
+		<h5 class="alert-heading">Status</h5>
+		<p>{{ status }}</p>
+		{% if status == 'Confirmation Email Sent' %}
+			<p>
+				<a href="/admin/send_confirmation_email/{{ employee_id }}" class="alert-link">Resend confirmation email?</a>
+			</p>
+		{% endif %}
+	</div>
+{% endif %}
+<form id="content" method="post">{# This is so we can have the focus thingy #}
+	{% csrf_token %}
+	<div class="form-group">
+		<div class="form-row">
+			<div class="col-lg">
+				{{ form.first_name.label_tag }}
+				{{ form.first_name }}
+				<!--div class="invalid-feedback">Please supply a first name.</div-->
+			</div>
+			<div class="col-lg">
+				{{ form.middle_name.label_tag }}
+				{{ form.middle_name }}
+				<!--div class="invalid-feedback">Please supply a middle name.</div-->
+			</div>
+			<div class="col-lg">
+				{{ form.last_name.label_tag }}
+				{{ form.last_name }}
+				<!--div class="invalid-feedback">Please supply a last name.</div-->
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		{{ form.pay_rate.label_tag }}
+		<div class="input-group">
+			<div class="input-group-prepend">
+			  <span class="input-group-text">$</span>
+			</div>
+			{{ form.pay_rate }}
+			<!--div class="invalid-feedback">Please enter a number with no more than 2 decimal points.</div-->
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="form-row">
+			<div class="col-lg">
+				{{ form.email.label_tag }}
+				{{ form.email }}
+				<!--div class="invalid-feedback">Email address is required</div-->
+			</div>
+		</div>
+		<div class="form-row">
+		  {% for error in form.email.errors %}
+			{% include 'admin/components/sub_errors.html' %}
+		  {% endfor %}
+		</div>
+	</div>
+	<div class="form-row justify-content-between">
+		<div class="btn-toolbar mb-1">
+      <button type="submit" class="btn btn-primary" name="_save" id="save-btn"><i class="fas fa-check mr-2"></i>Save</button>
+			{% if title_type == 'Add' %}
+				<button type="submit" class="ml-1 btn btn-primary" name="_addanother" value="Clicked"><i class="fas fa-user-plus mr-2"></i>Save And Add another</button>
+			{% endif %}
+			{% if title_type == 'Edit' %}
+				<button type="button" id="modify_times" class="ml-1 btn btn-secondary"><i class="fas fa-user-clock mr-2"></i>Modify times</button>
+			{% endif %}
+		</div>
+		<!--NOTE: This css is a fix to make the button match the size of the other buttons-->
+		<div class="btn-toolbar" style="display: -webkit-box">
+			{% if title_type == 'Edit' %}
+				<div class="dropup">
+				  <button class="btn btn-outline-danger dropdown-toggle mr-1" type="button" id="manageUser"
+				          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				    <i class="fas fa-wrench mr-2"></i>Manage User
+				  </button>
+				  <div class="dropdown-menu p-0" aria-labelledby="manageUser">
+					  <!--These hacky classes are so the list items can be colored-->
+					  <button type="button" id="del-emp" data-toggle="modal" data-toggle="modal" data-target="#deleteEmpModal"
+					     class="pt-2 pb-2 dropdown-item list-group-item-action list-group-item-danger">
+						  <i class="fas fa-user-slash mr-2"></i>Delete Employee Permanently
+					  </button>
+						{% if status == 'Active' %}{#<!--TODO: Have option to add password when not active-->#}
+					    <button type="button" id="go_to_change_password"
+					       class="pt-2 pb-2 dropdown-item list-group-item-action list-group-item-warning">
+						    <i class="fas fa-key mr-2"></i>Change Employee Password
+					    </button>
+						{% endif %}
+				  </div>
+				</div>
+			{% endif %}
+			<button type="reset" class="btn btn-danger" id="undo-btn"><i aria-hidden="true" class="fas fa-undo mr-2"></i>Undo Changes</button>
+		</div>
+	</div>
+</form>
+<!-- Modal -->
+<div class="modal fade" id="deleteEmpModal" tabindex="-1" role="dialog" aria-labelledby="deleteEmpModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteEmpModalLabel">Delete Employee?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+	        Are you sure you want to delete this employee and all their information?
+        </p>
+	      <p>
+	        Deleted employee info cannot be recovered!
+        </p>
+	      <p>
+	        Please make sure you print any time sheets you need before deleting this employee.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="deleteEmpModalCancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteEmpModalDel">Ok, delete this employee</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block afterScripts %}
+<script type="text/javascript" src="{% static 'crispyFrontendValidator.js' %}"></script>
+<script type="text/javascript">
+'use strict';
+$(document).ready(()=>{
+	{% if title_type == 'Edit' %}
+		$("#{{ form.email.id_for_label }}").tooltip({
+			"title":"A validation email will be sent to confirm any changes to the email",
+			"placement":"top",
+		})
+	{% endif %}
+	$("#deleteEmpModal").on('shown.bs.modal',function(){
+		$("#deleteEmpModalCancel").focus();
+	});
+	$("#deleteEmpModalDel").click(function(){
+		window.location.href = window.location.href.replace('#', '') + 'delete/'
+	})
+	$("#go_to_change_password").click(function(){
+		window.location.href = window.location.href.replace('employee', 'change_employee_password')
+	});
+	$("#modify_times").click(function(event){
+		event.preventDefault();
+		window.location.href = window.location.href.replace('employee', 'modify_times')
+	});
+	formIsReady();//The form is now ready
+})
+</script>{% endblock %}

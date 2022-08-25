@@ -1,1 +1,13 @@
 /TimeClick_Online/
+*.log
+/clock_actions/test_resources/
+/Helpful_docs/
+*db.sqlite3
+.idea/
+*media/
+*/__pycache__/
+*venv*
+static/django-admin-autocomplete-filter
+static/log_viewer
+static/admin
+*staticfiles*

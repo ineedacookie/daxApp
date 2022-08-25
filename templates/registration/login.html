@@ -1,0 +1,58 @@
+{% extends "signin.html" %}
+
+{% block content %}
+    <!--TODO: Make content link handle for the alerts-->
+    <!--TODO: adjust size for mobile-->
+    {% if form.errors %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <p>Your username and password didn't match. Please try again.</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <p>Your account doesn't have access to this page. To proceed,
+                    please login with an account that has access.</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% else %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <p>Please login to see this page.</p>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}" id="content">{# This is so we can have the focus thingy #}
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        {% csrf_token %}
+        <table style="margin:auto">
+            <!--TODO: apply classes (somehow?)-->
+
+            <tr>
+                <td>{{ form.username.label_tag }}</td>
+                <td>{{ form.username }}</td>
+            </tr>
+
+            <tr>
+                <td>{{ form.password.label_tag }}</td>
+                <td>{{ form.password }}</td>
+            </tr>
+        </table>
+        <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+        <input type="submit" value="login" type="button" class="btn btn-primary"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+
+    {# Assumes you setup the password_reset view in your URLconf #}
+
+{% endblock %}

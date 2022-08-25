@@ -1,0 +1,29 @@
+{% extends "globalTemplate.html" %}
+{% block title %}TimeClick Employee{% endblock %}
+{% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark justify-content-start bg-primary" style="background:#2aa5d5!important; max-height: 10vh;">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <img src="https://www.timeclick.com/wp-content/uploads/2019/05/profile-picture.png" alt="" style="max-height:7vh; max-width:7vh;">
+            TimeClick <i>Online</i>
+        </a>
+        <a class="btn btn-outline-dark btn-sm d-none d-md-block" href="/account_settings">
+            My Account
+        </a>
+        <a class="btn btn-outline-dark btn-sm d-none d-md-block" href="/logout">
+            Logout
+            <i aria-hidden="true" class="fas fa-sign-out-alt ml-1"></i>
+        </a>
+    </nav>
+    <div class="container" style="overflow:auto; max-height: 90vh;">
+        {% include 'messages.html' %}
+        <h1 class="h2 m-3">{% block header %}{% endblock %}</h1>
+        {% block content %}
+            <!--TODO: Don't forget to add ' id="content">{# This is so we can have the focus thingy #}' to the first element of the content!-->
+        {% endblock %}
+        {% if correct_timezone %}
+            <div class="text-right">
+                Current timezone: {{ correct_timezone }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

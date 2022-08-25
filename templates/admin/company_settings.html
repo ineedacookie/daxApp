@@ -1,0 +1,89 @@
+{% extends "admin.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title  %}Company Settings{% endblock %}
+{% block header %}Company Settings{% endblock %}
+
+{% block head %}
+<link href="{% static 'css/lightpick.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+	{% comment "This is most likely already be rendered by crispy "%}{% for error in form.timezone.errors %}
+    {% include sub_errors %}
+  {% endfor %}
+  {% for error in form.use_company_timezone.errors %}
+    {% include sub_errors %}
+  {% endfor %}{% endcomment %}
+
+	{% crispy form %}
+{% endblock %}
+{% block afterScripts %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script type="text/javascript" src="{% static 'lightpick.js' %}"></script>
+<script type="text/javascript" src="{% static 'crispyFrontendValidator.js' %}"></script>
+<script type="text/javascript">
+'use strict';
+$(document).ready(()=>{
+	var $period_input_date = $('#id_period_begin_date');
+	var picker = new Lightpick({
+		field: $period_input_date[0]
+	});
+
+	$("#id_pay_period_type").change(function(){
+		let $elm              = $('#id_pay_period_type'),
+		    $semi_monthly_elm = $('#semi_monthly_div'),
+		    $period_wrapper   = $('#div_id_period_begin_date'),
+		    today             = new Date();
+		console.log($elm,$semi_monthly_elm)
+		today.setDate(1);
+		switch($elm.val()){
+			case 's'://Semi-Monthly
+				$semi_monthly_elm.show();
+				let dd = today.getDate();
+				let mm = today.getMonth() + 1;
+
+				let yyyy = today.getFullYear();
+				if (dd < 10) {
+					dd = '0' + dd;
+				}
+				if (mm < 10) {
+					mm = '0' + mm;
+				}
+				let today_string = yyyy + '-' + mm + '-' + dd;
+				$period_input_date.val(today_string)
+				$period_wrapper.hide();
+				//$period_input_date.prop("disabled",true);
+				break;
+			default://Everything else
+				$semi_monthly_elm.hide();
+				$period_wrapper.show();
+				//$period_input_date.prop("disabled",false);
+				break;
+		}
+	}).change()
+
+	var thingsToEnable={
+		// jquery selector x enables jquery selector y
+		"#id_weekly_overtime":"#id_weekly_overtime_value",
+		"#id_daily_overtime":"#id_daily_overtime_value",
+		"#id_double_time":"#id_double_time_value",
+		"#id_enable_breaks":"#id_breaks_are_paid, #id_include_breaks_in_overtime_calculation"
+	}
+	for (var ch in thingsToEnable) {
+		$(ch).data("enables",thingsToEnable[ch]) //Make sure that we can get this value later
+		 .change(function(event){
+			var elm=$(this);
+			$(elm.data("enables")).prop("disabled",!elm.is(':checked'));
+		}).change();
+	}
+	$("#id_enable_breaks").change(function(){
+		var elm=$(this);
+		if (!elm.prop("checked")){
+			$(elm.data("enables")).prop("checked",false)
+		}
+		formIsReady();//The form is ready at this point, as this gets triggered right away
+	}).change();
+})
+</script>{% endblock %}

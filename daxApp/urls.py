@@ -14,8 +14,32 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+admin.site.site_header = 'Imperial Officer'
+admin.site.site_title = 'Officer Site Admin'
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('io_admin/', admin.site.urls),
+    path('io_admin/log_viewer/', include('log_viewer.urls')),
+]
+
+# Add django site authenticated urls (for login, logout, password management)
+urlpatterns += [
+    path('', include('django.contrib.auth.urls')),
+]
+
+# Add user create app
+urlpatterns += [
+    path('', include('users.urls')),
+]
+
+# Add clock_actions module
+urlpatterns += [
+    path('', include('clock_actions.urls'))
+]
+
+# Add feedback module
+urlpatterns += [
+    path('', include('feedback.urls'))
 ]

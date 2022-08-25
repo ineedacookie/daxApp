@@ -1,0 +1,53 @@
+{% extends "base_template.html" %}
+{% load static %}
+{% block content %}
+
+<div id="placeholder-wrapper">
+    <form id="match-items-form" method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <th>
+                    TimeClick Name
+                </th>
+                <th>
+                    QuickBooks Name
+                </th>
+            </tr>
+            {{ formset.management_form }}
+            {% for form in formset %}
+            {{ form.id}}
+            {% if form.tc_item.value %}
+            <tr>
+                <td class="hidden">{{ form.tc_item }}</td>
+                <td class="center_text">
+                    {{ form.tc_item.value }}
+                </td>
+                <td>
+                    {{ form.qb_item }}
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="error_message">
+                    {{ form.qb_item.errors }}
+                </td>
+
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+    </form>
+</div>
+<div id="sidebar-instructions">
+    <h4>Instructions</h4>
+    <p>Use the dropdown on the left to choose the correct payroll item.</p>
+    <p>Every TimeClick code needs to be matched to a QuickBooks item. If you are not using it then select "Not
+        used."</p>
+    <p>The QuickBooks items are generated using the <strong>Payroll Items</strong> file that was uploaded in the
+        previous step. If you need to update the list of QuickBooks items then you will need to export a new Payroll
+        Items list from QuickBooks and upload it in the QuickBooks Files section.</p>
+</div>
+<hr class="btn-bar"/>
+<button class="done_button" form="match-items-form" type="submit">Done</button>
+{% endblock %}

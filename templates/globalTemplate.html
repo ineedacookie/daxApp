@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="TimeClick">
+	{% block favicon %}<link rel="icon" href="https://www.timeclick.com/wp-content/uploads/2019/05/profile-picture.png">{% endblock %}
+
+	<title>{% block title %}{% endblock %}</title>
+
+	<!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+	<!-- Themed CSS --
+	<link href="https://stackpath.bootstrapcdn.com/bootswatch/4.4.1/flatly/bootstrap.min.css" rel="stylesheet" integrity="sha384-yrfSO0DBjS56u5M+SjWTyAHujrkiYVtRYh2dtB3yLQtUz3bodOeialO59u5lUCFF" crossorigin="anonymous">
+	-->
+	<style>
+		html{
+			/*font-size:2.5vh;*/
+			font-size:1.125em
+		}
+
+		{% if not use_built_in_date %}
+			input[type="date"]::-webkit-inner-spin-button,
+			input[type="date"]::-webkit-calendar-picker-indicator {
+				display: none;
+				-webkit-appearance: none;
+			}
+		{% endif %}
+	</style>
+	{% block head %}{% endblock %}
+</head>
+<body class="{% block bodyClass %}{% endblock %}">
+	{# Assumes that an object with the id "content" exists #}
+	<a class="sr-only sr-only-focusable bg-light" href="#content">Skip to main content</a>
+	{% block body %}
+		{% block content %}
+			<!--TODO: Don't forget to add ' id="content">{# This is so we can have the focus thingy #}' to the first element of the content!-->
+		{% endblock %}
+	{% endblock %}
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/1aef2224ff.js" crossorigin="anonymous"></script>
+	{#<!--TODO: start using bootstrap tooltips whereever possible-->#}
+	<script type="text/javascript">
+		$(document).ready(()=>{
+			$('[data-toggle="tooltip"]').tooltip()
+			//$('[title]').tooltip()
+			$('[data-toggle="popover"]').popover()
+		})
+	</script>
+	{% block afterScripts %}{% endblock %}
+    <noscript class="text-center">
+         	Your browser does not support JavaScript. Please activate JavaScript or switch to a different browser for the best experience. <br/>
+			<a href="https://www.thoughtco.com/what-is-javascript-used-for-2037679">What is Javascript?</a>
+	</noscript>
+</body>
+</html>

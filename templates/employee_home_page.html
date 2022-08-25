@@ -1,0 +1,63 @@
+{% extends "employee.html" %}
+{% load tz %}
+
+{% block title  %}Clock Actions{% endblock %}
+{% block header %}Clock Actions{% endblock %}
+
+{% block content %}
+<!--TODO: move this file to a new folder: `employee`-->
+{% if cur_action.action %}
+  <div class="current_time_action">
+    <h2>Status</h2>
+    <div>{{ cur_action.type }}</div>
+    <div>{{ cur_action.date }} at {{ cur_action.time }}</div>
+  </div>
+{% endif %}
+<form class="text-justify" method="post" id="content">{# This is so we can have the focus thingy #}
+  {% csrf_token %}
+  <div class="form-group">
+    <div class="btn-group-vertical btn-group-lg btn-group-toggle w-100" role="group" aria-label="Clock Actions" data-toggle="buttons">
+      <label class="btn btn-outline-success{% if selected == 'i' %} active{% endif %}">
+        <input type="radio" name="action" value="i" id="in" autocomplete="off"{% if selected == 'i' %} checked{% endif %}><i class="far fa-clock fa-flip-horizontal m-1"></i>Clock In
+      </label>
+      <label class="btn btn-outline-primary{% if selected == 'o' %} active{% endif %}">
+        <input type="radio" name="action" value="o" id="out" autocomplete="off"{% if selected == 'o' %} checked{% endif %}><i class="far fa-clock m-1"></i>Clock Out
+      </label>
+      {% if breaks %}
+        <label class="btn btn-outline-primary{% if selected == 'b' %} active{% endif %}">
+          <input type="radio" name="action" value="b" id="break" autocomplete="off"{% if selected == 'b' %} checked{% endif %}><i class="far fa-pause-circle m-1"></i>Begin Paid Break
+        </label>
+        <label class="btn btn-outline-success{% if selected == 'e' %} active{% endif %}">
+          <input type="radio" name="action" value="e" id="finish" autocomplete="off"{% if selected == 'e' %} checked{% endif %}><i class="far fa-play-circle m-1"></i>Finish Break
+        </label>
+      {% endif %}
+    </div>
+    {{ form.type }}
+    <script>
+      (function waitfor$(callback){
+        if (typeof window["jQuery"]=="undefined"){
+          setTimeout(function() {
+            waitfor$(callback);
+          },30);
+        }else{
+          callback();
+        }
+      })(()=>{
+        $(()=>{
+          $('input:radio[name=action]').change(function () {
+            $('#id_type').val($("input[name='action']:checked").val());
+          });
+        });
+      })
+    </script>
+  </div>
+  <div class="form-group">
+    {{ form.comment.label_tag }}
+    {{ form.comment }}
+  </div>
+  <div class="form-group d-flex justify-content-between">
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a class="btn btn-outline-secondary" href="#">Employee Options</a>
+  </div>
+</form>
+{% endblock %}

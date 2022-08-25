@@ -1,0 +1,257 @@
+{% extends "reports/letter_head.html" %}
+{% block css %}
+{% if form.other_space_on_right %}
+div.container{
+    width: 80%;
+}
+{% endif %}
+
+{% if form.other_new_page_for_each_employee %}
+div.employee_section{
+        page-break-after: always;
+    }
+{% endif %}
+{% if form.other_font_size == 'small' %}
+p, div, td{
+    font-size: 10px;
+}
+
+h2 {
+    font-size: 14px;
+}
+
+th, .grand_totals td {
+    font-size: 12px;
+}
+{% elif form.other_font_size == 'large' %}
+p, div, td{
+    font-size: 16px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+th, .grand_totals td {
+    font-size: 18px;
+}
+{% else %}
+p, div, td{
+    font-size: 12px;
+}
+
+h2 {
+    font-size: 16px;
+}
+
+th, .grand_totals td {
+    font-size: 14px;
+}
+{% endif %}
+
+div, p, td {
+    font-family: sans-serif;
+}
+
+        .top_bar {
+    display: inline-block;
+    width: 100%;
+}
+
+.top_bar div {
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+
+.left_side {
+    text-align: left;
+}
+
+.right_side {
+    text-align: right;
+}
+
+p.lighter_text {
+    color: darkgray;
+}
+
+.top_bar div p {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+hr {
+    border-width: 2px;
+    border-left-width: 0px;
+}
+
+.previous {
+    color: #2aa5d5;
+}
+
+h2 {
+    margin-bottom: 0;
+}
+.italics {
+    font-style: italic;
+}
+
+.grayed_out{
+    color: darkgray;
+}
+
+body {
+    background-color: rgb(82, 86, 89);
+}
+
+div.paper {
+    max-width: 297mm;
+    min-width: 297mm;
+    background-color: white;
+    box-shadow: rgb(0,0,0,0.7) 0px 0px 20px 0px;
+    margin: auto;
+    margin-top: 3em;
+    margin-bottom: 3em;
+    padding: .5in;
+}
+
+td.right-side {
+    text-align: right;
+}
+
+th {
+    text-align: right;
+    border-width: 0px;
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+    border-bottom-color: lightgray;
+}
+
+table.summary_table {
+    width: 100%;
+}
+
+.grand_totals td {
+    border-width: 0px;
+    border-top-width: 2px;
+    border-top-color: lightgray;
+    border-top-style: solid;
+}
+
+tr.odd {
+    background-color: #d4e4f2!important;
+}
+
+tr.grand_totals {
+    font-weight: bold;
+}
+
+td:nth-child(2) {
+    font-weight: bold;
+}
+
+@media print {
+    div.paper {
+        visibility: visible;
+        box-shadow: none;
+        margin: auto;
+        padding: 0;
+    }
+    div.employee_section{
+        margin: 0;
+    }
+    .print_btn{
+        display: none;
+        visibility: hidden;
+    }
+    @page {
+        size: 297mm 210mm; /* landscape */
+    }
+    body {
+        background-color: white;
+    }
+}
+
+{% endblock %}
+{% block title %}{{ company.name }} Summary Report{% endblock %}
+{% block report %}{{ company.name }} Summary Report{% endblock %}
+{% block content %}
+
+<table class="summary_table" cellspacing="0">
+    <tr class="headers">
+        <th width="20%"></th>
+        <th width="10%">Total</th>
+        {% if form.display_employee_pay_total %}
+            <th width="10%">Total<br/>Pay</th>
+        {% endif %}
+        <th width="10%">Regular<br/>Hours</th>
+        {% if overtime > 0%}
+            <th width="10%">Total<br/>Overtime</th>
+            {% if weekly_overtime > 0 %}
+                <th width="10%" class="grayed_out">Weekly<br/>Overtime</th>
+            {% endif %}
+            {% if daily_overtime > 0 %}
+                <th width="10%" class="grayed_out">Daily<br/>Overtime</th>
+            {% endif %}
+            {% if double_time > 0 %}
+                <th width="10%">Double<br/>Time</th>
+            {% endif %}
+        {% endif %}
+        {% if break > 0 %}
+            <th width="10% {% if not paid_breaks %}grayed_out{% endif %}">Breaks</th>
+        {% endif %}
+    </tr>
+    {% for employee in employees %}
+        <tr class="employees {% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
+            <td width="20%">{{ employee.name }}</td>
+            <td class="right-side" width="10%">{% if paid_breaks %}{{ employee.str_total_with_break }} {% else %}{{ employee.str_total }}{% endif %}</td>
+            {% if form.display_employee_pay_total %}
+                <td class="right-side" width="10%">${{ employee.pay_total|floatformat:2 }}</td>
+            {% endif %}
+            <td class="right-side" width="10%">{{ employee.str_regular }}</td>
+            {% if overtime > 0%}
+                <td class="right-side" width="10%">{{ employee.str_overtime }}</td>
+                {% if weekly_overtime > 0 %}
+                    <td class="right-side grayed_out" width="10%">{{ employee.str_weekly_overtime }}</td>
+                {% endif %}
+                {% if daily_overtime > 0 %}
+                    <td class="right-side grayed_out" width="10%">{{ employee.str_daily_overtime }}</td>
+                {% endif %}
+                {% if double_time > 0 %}
+                    <td class="right-side" width="10%">{{ employee.str_double_time }}</td>
+                {% endif %}
+            {% endif %}
+            {% if break > 0 %}
+                <td class="right-side" width="10% {% if not paid_breaks %}grayed_out{% endif %}">{{ employee.str_break }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    {% if form.display_grand_totals %}
+        <tr class="grand_totals">
+            <td width="20%">Grand Totals</td>
+            <td class="right-side" width="10%">{% if paid_breaks %}{{ str_total_with_break }} {% else %}{{ str_total }}{% endif %}</td>
+            {% if form.display_employee_pay_total %}
+                <td class="right-side" width="10%">${{ pay_total|floatformat:2 }}</td>
+            {% endif %}
+            <td class="right-side" width="10%">{{ str_regular }}</td>
+            {% if overtime > 0%}
+                <td class="right-side" width="10%">{{ str_overtime }}</td>
+                {% if weekly_overtime > 0 %}
+                    <td class="right-side" width="10%">{{ str_weekly_overtime }}</td>
+                {% endif %}
+                {% if daily_overtime > 0 %}
+                    <td class="right-side" width="10%">{{ str_daily_overtime }}</td>
+                {% endif %}
+                {% if double_time > 0 %}
+                    <td class="right-side" width="10%">{{ str_double_time }}</td>
+                {% endif %}
+            {% endif %}
+            {% if break > 0 %}
+                <td class="right-side" width="10% {% if not paid_breaks %}grayed_out{% endif %}">{{ str_break }}</td>
+            {% endif %}
+        </tr>
+    {% endif %}
+</table>
+
+{% endblock %}

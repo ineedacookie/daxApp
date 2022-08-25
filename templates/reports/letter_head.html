@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="TimeClick">
+    {% block favicon %}<link rel="icon" href="https://www.timeclick.com/wp-content/uploads/2019/05/profile-picture.png">{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+    <style type="text/css">
+    {% if not company.weekly_overtime %}
+        .previous_display{
+            visibility: hidden;
+            display: none;
+        }
+    {% endif %}
+    {% block css %}{% endblock %}
+    </style>
+    {% block head %}{% endblock %}
+</head>
+{% load static %}
+<body>
+    <div class="paper">
+        <button class="print_btn" style="margin:auto; margin-top: 1em; margin-bottom:1em; display: block;" onclick="window.print()">Print Document</button>
+        <div class="container">
+            <div class="top_bar">
+                <div class="left_side">
+
+                    {% block report %}{% endblock %}
+                </div>
+
+                <div class="right_side">
+                    <p class="lighter_text">{{ todays_date }}</p>
+                    <p>(<span class="previous previous_display">{{ previous_begin_date }}* - </span>{{ begin_date }} - {{ end_date }})</p>
+
+                </div>
+            </div>
+            <hr/>
+            {% block content %}{% endblock %}
+        </div>
+        <button class="print_btn" style="margin:auto; margin-top: 1em; margin-bottom:1em; display: block;" onclick="window.print()">Print Document</button>
+    </div>
+</body>
+</html>

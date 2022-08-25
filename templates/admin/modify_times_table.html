@@ -1,0 +1,142 @@
+{% extends "admin.html" %}
+{% load static %}
+{% load tz %}
+
+{% block head %}
+<link href="{% static 'css/lightpick.css' %}" rel="stylesheet">
+<style>.lightpick{z-index: 0;}</style>
+{% endblock %}
+
+{% block title  %}Modify Times{% endblock %}
+{% block header %}Modify Times{% endblock %}
+
+{% block content %}
+<div class="justify-content-center row">
+	<div>Employee: {{ name }}</div>
+</div>
+<div class="justify-content-center row">
+	<div><div id="calendar_anchor"></div></div>
+</div>
+<form class="action_list" method="post">
+	{% csrf_token %}
+	<div class="form-group">
+    {{ formset.management_form }}
+		{% for form in formset.forms %}
+			<div class="form-row card mt-2">
+				<div class="card-body row">
+					<div class="col-md-6 col-lg">
+						{{ form.type.label_tag }}
+						{{ form.type }}
+					</div>
+					<div class="col-md-6 col-lg">
+						{{ form.action_datetime.label_tag }}
+						<div class="input-group">
+							{#<!--TODO: we need this to be interactive. type="date" and type="time" are needed-->#}
+							{% timezone correct_timezone %}
+								{{ form.action_datetime }}
+							{% endtimezone %}
+						</div>
+					</div>
+					<div class="col-md col-lg">
+						{{ form.comment.label_tag }}
+						{{ form.comment }}
+					</div>
+					<div class="col-md col-lg-2">
+						{{ form.DELETE.label_tag }}
+						{{ form.DELETE }}
+						{% comment "form.DELETE.name evaluates to 'DELETE' not 'form-0-DELETE'" %}
+						<div class="custom-control custom-checkbox">
+							<!--input type="checkbox" class="custom-control-input" name="form-0-DELETE" id="{{ form.DELETE.id_for_label }}"-->{# what we want #}
+							<input type="checkbox" class="custom-control-input" name="{{ form.DELETE.name }}" id="{{ form.DELETE.id_for_label }}">
+							<label class="custom-control-label" for="{{ form.DELETE.id_for_label }}">{{ form.DELETE.label }}</label>
+						</div>
+						{% endcomment %}
+					</div>
+				</div>
+			</div>
+			{{ form.id }}
+		{% endfor %}
+	</div>
+
+	<div class="form-row justify-content-center">
+		<div class="btn-toolbar">
+			{% if formset.forms %}<button type="submit" id="apply-changes" class="btn btn-primary mr-2"><i class="fas fa-check mr-2"></i>Apply</button>{% endif %}
+			<button type="button" id="add-action" class="btn btn-success mr-2"><i class="fas fa-calendar-plus mr-2"></i>Add Clock Action</button>
+		</div>
+	</div>
+</form>
+{% endblock %}
+{% block afterContent %}
+<div class="p-5">{# This is so you can scroll the button out of the way #}
+	<a href="{% url 'edit_employee' employee_id %}" class="btn btn-primary m-3 p-3 position-absolute rounded-circle" data-toggle="tooltip" data-placement="left" title="Edit {{ name }}" style="bottom:0; right:0; width:3.5em; height:3.5em">
+		<span class="sr-only">Edit {{ name }}</span>
+		<i class="fas fa-user-edit mr-2" aria-hidden="true"></i>
+	</a>
+</div>
+{% endblock %}
+
+{% block afterScripts %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script type="text/javascript" src="{% static 'lightpick.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/check_errors.js' %}"></script>
+<script type="text/javascript">
+	$(document).ready(()=>{
+		/** parse a date in yyyy-mm-dd format */
+		/*function parseDate(input) { //Not used
+			let parts = input.split('-');
+			return new Date(parts[0], parts[1]-1, parts[2]); // Note: months are 0-based
+		}*/
+
+		/* Variables that are necessary for the calendar widget */
+		var dates_with_times = {{ dates_with_times|safe }}
+		var days = document.getElementsByClassName('lightpick__day')
+		var field = document.getElementById('calendar_anchor')
+		var date_received = new Date('{{ selected_date }}')
+		var picker = new Lightpick({
+			field: field,
+			inline: true,
+			onSelect: function(date){
+				if(date_received.toDateString() != picker.getDate().toDate().toDateString()){
+					window.location.href = '/admin/modify_times/' + {{ employee_id }} + '/' + date.format('YYYYMMDD')
+				}
+			}
+		});
+
+		picker.setDate(date_received)
+		picker.gotoDate(date_received)
+
+		/* goes through all the days of the month on the calendar and if they have times then it attaches has_times to the class name */
+		for(date in dates_with_times){
+			for(day in days){
+				if(parseInt(dates_with_times[date]) == days[day].innerHTML){
+					if(!days[day].className.includes("is-previous-month")){
+						days[day].className = days[day].className + ' has_times'
+						break
+					}
+				}
+			}
+		}
+
+		var numberOfCheckedDeleteBoxes=0
+		$('input[type="checkbox"]').map(function(a,b){/// Search for checkboxes with "DELETE" in their ID
+	    return $(b).attr("id").indexOf("DELETE")>-1?b:undefined
+		}).change(function(){///If when any are changed, update the total, then if there is more than 0 total, indicate that apply-changes is dangerous
+			if ($(this).prop("checked")){
+				numberOfCheckedDeleteBoxes++
+			}else{
+				numberOfCheckedDeleteBoxes--
+			}
+			if (numberOfCheckedDeleteBoxes>0){
+				$("#apply-changes").removeClass("btn-primary").addClass("btn-danger")
+					.append('<div class="sr-only" id="apply-changes-warning">(Applying changes will remove one or more clock actions)</div>')
+			}else{
+				$("#apply-changes").addClass("btn-primary").removeClass("btn-danger")
+				$("#apply-changes-warning").remove()
+			}
+		})
+		$("#add-action").click(function(){
+		  window.location.href = window.location.href.replace('modify_times', 'time_action_create')
+		});
+	})
+</script>
+{% endblock %}

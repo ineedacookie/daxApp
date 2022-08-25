@@ -1,0 +1,62 @@
+{% extends "base_template.html" %}
+{% load static %}
+{% block content %}
+
+<div id="employee-matching-wrapper">
+    <form id="match-employee-names-form" method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <th>
+                    TimeClick Name
+                </th>
+                <th>
+                    QuickBooks Name
+                </th>
+            </tr>
+            {{ formset.management_form }}
+            {% for form in formset %}
+            {{ form.id}}
+            {% if form.tc_name.value %}
+            <tr>
+                <td class="hidden">{{ form.tc_name }}</td>
+                <td class="center_text">
+                    {{ form.tc_name.value }}
+                </td>
+                <td>
+                    {{ form.qb_name }}
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="error_message">
+                    {{ form.qb_name.errors }}
+                </td>
+
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+    </form>
+</div>
+<div id="sidebar-instructions" class="width-adjustor2">
+    <h4>Instructions</h4>
+    <p>Employee names are how QuickBooks keeps track of employee data. If a name is not spelled the exact same way, then
+        the import won't match the employees and the hours won't be applied.</p>
+    <p>Match the names in TimeClick on the left with the names from QuickBooks on the right.</p>
+    <p>**If you don't want an employee on the QuickBooks import then select "Remove Employee."</p>
+    <p><a id="helper-link-1" href="">What if an employee isn't showing up?</a></p>
+</div>
+<div id="helper-div-1" style="height: 235px; display: none;">
+    <div>
+        <h2>Missing Employees</h2>
+        <p><strong>QuickBooks:</strong> The QuickBooks names are pulled in from the EmployeeList.IIF that is imported
+            from QuickBooks. If the employee isn't in that file then he/she may not be on the list.</p>
+        <p><strong>Solution:</strong> You may need to export from QuickBooks a new Employee List and upload it to the
+            Integration Center.</p>
+        <button class="close-btn">Done</button>
+    </div>
+</div>
+<hr class="btn-bar"/>
+<button class="done_button" form="match-employee-names-form" type="submit">Done</button>
+{% endblock %}

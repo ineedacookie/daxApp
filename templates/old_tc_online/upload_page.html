@@ -1,0 +1,77 @@
+{% extends "base_template.html" %}
+{% load static %}
+{% block content %}
+<h2 class="upload_header">QuickBooks Files Management</h2>
+<p>Creating a report for QuickBooks requires a quick one-time set-up. You will need to export and upload a few files
+    from QuickBooks to make sure that your data is formatted correctly.</p>
+<div id="placeholder-wrapper">
+
+    <form enctype="multipart/form-data" id="upload-form" method="post">
+        {% csrf_token %}
+        <p>From QuickBooks you will need:</p>
+        <table>
+            {% for field in form %}
+            <tr>
+                {% if field.help_text %}
+                <th>
+                    <small style="display: none">{{ field.help_text }}</small>
+                </th>
+                {% endif %}
+                {% for error in field.errors %}
+                <td><p style="color: red">{{ error }}</p></td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th class="upload_button">{{ field.label_tag }}</th>
+                {% if field.exists %}
+                <td class="visable">
+                    <img class="green-check-mark" src="https://www.timeclick.com/payroll/resources/images/check.png"
+                         alt="green check mark for confirmation">
+                    <p>Click the name to change.</p>
+                </td>
+                <td class="hidden">
+                    {{ field }}
+                </td>
+                {% else %}
+                <td class="hidden">
+                    <img class="green-check-mark" src="https://www.timeclick.com/payroll/resources/images/check.png"
+                         alt="green check mark for confirmation">
+                </td>
+                <td class="visable">{{ field }}</td>
+                {% endif %}
+            </tr>
+            {% if field.error %}
+            <tr>
+                <th class="error_message">
+                    Error:
+                </th>
+                <td class="error_message">
+                    {{ field.error }}
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </table>
+        <p>Once those files have been uploaded, click the done button.</p>
+        <button class="done_button" type="submit">Done</button>
+    </form>
+</div>
+<div id="sidebar-instructions">
+    <h4>Instructions</h4>
+    <p>Open QuickBooks and export the following 3 files: <strong>Timer List</strong>, <strong>Payroll Items</strong>,
+        <strong>Employee List</strong>. Upload these here.</p>
+    <p>Initially this only needs to be done once. However, if your QuickBooks data changes then you will need to upload
+        new versions of the files.<br><a id="helper-link-1" href="">When will I need to upload new files?</a></p>
+</div>
+<div id="helper-div-1" style="height: 260px;">
+    <div>
+        <h2>When to upload new files</h2>
+        <p>1. QuickBooks occassionally installs updates you will need to upload a new <strong>Timer List</strong> file
+            after each update.</p>
+        <p>2. Creating new Payroll Items in QuickBooks or change the existing ones, will require a new upload of the
+            <strong>Payroll Items</strong> list.</p>
+        <p>3. Adding new Employees to QuickBooks will require a new <strong>Employee List</strong> to be uploaded.</p>
+        <button class="close-btn">Done</button>
+    </div>
+</div>
+{% endblock %}

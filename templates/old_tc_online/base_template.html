@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="https://www.w3.org/1999/xhtml">
+{% load static %}
+<html>
+<head>
+    <meta name="author" content="TimeClick">
+    <link rel="icon" href="https://www.timeclick.com/wp-content/uploads/2019/05/profile-picture.png">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>QuickBooks - Payroll Software Integration</title>
+
+    <meta name="Description"
+          content="Export employee hours reports to QuickBooks Pro format. Integrates TimeClick employee hours report with QuickBooks."/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="timeclick, quickbooks, payroll software integration"/>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-33983409-1']);
+  _gaq.push(['_setDomainName', 'timeclick.com']);
+  _gaq.push(['_setAllowLinker', true]);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'https://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="{% static 'js/quickbooks.js' %}"></script>
+    <link rel="stylesheet" type="text/css" media="screen, print, projection" href="{% static 'css/upload.css' %}"/>
+    <link rel="stylesheet" type="text/css" media="screen, print, projection" href="{% static 'css/compressed.css' %}"/>
+    <link rel="stylesheet" type="text/css" media="screen, print, projection"
+          href="{% static 'css/payroll_styles.css' %}"/>
+
+</head>
+
+<body>
+<div id="grey-filter" class="hidden"></div>
+<div id="header" class="new-header" style="position: fixed; top: 0px;">
+
+    <div class="header-container">
+
+        <!-- div id="phoneHeader">435.753.4102
+      </div> <!-- end phoneHeader -->
+
+        <div class="logo">
+            <a href="https://www.timeclick.com/"><img
+                    src="https://www.timeclick.com/tc/images/support-center/TimeClickLogo.png" border="0"></a>
+            <a href="https://www.timeclick.com/"><h1>TimeClick</h1></a>
+        </div><!-- end class logo -->
+        <div id="hamburger" class="nav-hamburger">
+            <img src="">
+        </div> <!-- id=hamburger -->
+        <div class="nav">
+            <ul>
+                <li id="support-nav-link"><a class="nav-link" href="/">Main Menu</a><span id="last-nav-divider"
+                                                                                          class="header-divider">|</span>
+                </li>
+                <li><a>{{ user.get_username }}</a><span id="last-nav-divider" class="header-divider">|</span></li>
+                <li id="support-nav-link"><a class="nav-link" href="{% url 'logout'%}">Log Out</a></li>
+            </ul>
+        </div><!-- end class nav -->
+
+    </div><!--end Container-->
+
+
+</div><!-- end Header -->
+
+<!--[if lte IE 7]>
+<div id="updatebrowser">
+    <div id="browser-notice">
+			<span>
+				Your browser is keeping you from fully experiencing this website.
+				<br> <br>
+				Update your internet browser to continue.
+				<br>
+			</span>
+    </div>
+    <div id="browser-icons">
+        <div class="iconbox">
+            <a href="https://www.mozilla.org/en-US/firefox/new/" title="Download latest version of Firefox">
+                <img src="https://www.timeclick.com/tc/images/browser/firefox.png" alt="Firefox icon">
+                <span style="margin-left: 23px;">Firefox</span>
+            </a>
+        </div>
+        <div class="iconbox">
+            <a href="https://www.google.com/chrome/" title="Download latest version of Google Chrome">
+                <img src="https://www.timeclick.com/tc/images/browser/Google_Chrome_icon_(2011).png" alt="Chrome icon">
+                <span style="margin-left: 23px;">Chrome</span>
+            </a>
+        </div>
+        <div class="iconbox">
+            <a href="https://www.microsoft.com/en-us/download/internet-explorer.aspx"
+               title="Download latest version of Internet Explorer">
+                <img src="https://www.timeclick.com/tc/images/browser/ie-icon.png" alt="Internet Explorer icon">
+                <span style="margin-left: -10px;">Internet Explorer 11</span>
+            </a>
+        </div>
+        <div class="iconbox">
+            <a href="https://www.apple.com/support/mac-apps/safari/" title="Download latest version of Safari">
+                <img src="https://www.timeclick.com/tc/images/browser/safari.png" alt="Firefox icon">
+                <span style="margin-left: 27px;">Safari</span>
+            </a>
+        </div>
+    </div>
+</div>
+<![endif]-->
+
+
+<div id="content">
+    <div class="container title">
+        <h1>Payroll Software Integration Center</h1>
+        <div id="software-list-container">
+            <ul>
+                <li id="qb" class="selected-software quickbooks">QuickBooks&reg;</li>
+                <li id="adp" class="coming-soon">ADP&reg;</li>
+                <li id="paychex" class="coming-soon">Paychex&reg;</li>
+                <!--a href="https://www.timeclick.com/payroll/paychex-integration" title="Select Paychex as your Payroll Software"><li id="paychex" class="not-selected paychex">Paychex&reg;</li></a-->
+                <li id="sage" class="coming-soon">Sage&reg;</li>
+            </ul>
+        </div>
+
+        <p></p>
+    </div>
+
+    <div id="software-interface" class="container">
+        <div id="top-manual-banner">
+            <a href="manuals/TimeClick-QuickBooks Integration Manual.pdf" target="_blank"
+               title="QuickBooks Guide for Payroll Integration - PDF"><img src="{% static 'images/icon-pdf-mini.png' %}"
+                                                                           alt="icon of mini pdf" height="28"
+                                                                           width="20"/></a>
+            <p style="display: inline-block; position: relative; top: -5px; padding-left: 7px;"><a
+                    href="manuals/TimeClick-QuickBooks Integration Manual.pdf" target="_blank"
+                    title="QuickBooks Guide for Payroll Integration - PDF">Click here</a> to open a PDF document that
+                will guide you through the set-up process.</p>
+        </div>
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="videos">
+        <table class="video_instructions">
+            <tr>
+                <th class="larger_header">
+                    TimeClick LE versions instructions
+                </th>
+                <th class="larger_header">
+                    TimeClick 2018, 2019 instructions
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <iframe id="LE" src="https://youtube.com/embed/bPrv8Qgu3Ik" width="640" height="360"
+                            allowfullscreen="true"
+                            frameborder="0"></iframe>
+                </td>
+                <td>
+                    <iframe id="2018, 2019" src="https://youtube.com/embed/XlKd3BpdcyA" width="640" height="360"
+                            allowfullscreen="true"
+                            frameborder="0"></iframe>
+                </td>
+            </tr>
+        </table>
+
+
+    </div>
+
+    <div id="pdf-manual-banner">
+        <div class="container">
+            <!--h1>Software Integration Manual</h1-->
+
+            <div id="manual-list-container">
+                <ul>
+                    <li class="manual-li"><a href="manuals/TimeClick-QuickBooks Integration Manual.pdf" target="_blank"
+                                             title="QuickBooks Integration Manual - PDF"><img
+                            src="{% static 'images/file-icon2.png' %}" alt="mini pdf icon"/><span>QuickBooks Integration Manual</span></a>
+                    </li>
+                    <!-- NOTES
+                    /* Other manuals should only display if that specific software is selected
+                    /* Need to decide how to display
+                    /* Currently QuickBooks is the only option. So, only going to show QB guide
+
+                    <li class="manual-li"><a href="#"><img src="images/file-icon2.png" alt="ADP logo"/><span>ADP</span></a></li>
+                    <li class="manual-li"><a href="#"><img src="images/file-icon2.png" alt="Paychex logo/><span>Paychex</span></a></li>
+                    <li class="manual-li"><a href="#"><img src="images/file-icon2.png" alt="Sage logo/><span>Sage</span></a></li>
+
+                    -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end content-->
+
+</body>
+</html>

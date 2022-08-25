@@ -1,0 +1,13 @@
+{% extends "signin.html" %}
+
+{% block content %}
+
+
+<div class="form-signin" id="content">{# This is so we can have the focus thingy #}
+    <h1 class="h3 mb-3 font-weight-normal">Successfully Signed Out</h1>
+    <p><a href="{% url 'login'%}">Log back in?</a></p>
+</div>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+
+{% endblock %}

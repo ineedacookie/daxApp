@@ -1,0 +1,13 @@
+{% extends "globalTemplate.html" %}
+{# view for creating the account password #}
+
+{% block title  %}Create TimeClick Password{% endblock %}
+{% block header %}Create TimeClick Password{% endblock %}
+
+{% block content %}
+<form id="content" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
