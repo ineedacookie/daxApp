@@ -21,16 +21,16 @@ class CustomUserAdmin(UserAdmin):
     list_filter = (CompanyFilter, 'is_staff', 'is_active', 'created_date')
     fieldsets = (
         (None, {'fields': (
-        'email', 'password', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'wp_id', 'timezone',
-        'verified', 'time_action', 'pay_rate')}),
+        'email', 'password', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'timezone',
+        'verified', 'time_action')}),
         ('Permissions', {'fields': ('is_staff', 'is_active')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
             'fields': (
-            'company', 'email', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'wp_id', 'timezone',
-            'verified', 'password1', 'password2', 'pay_rate', 'is_staff', 'is_active')}
+            'company', 'email', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'timezone',
+            'verified', 'password1', 'password2', 'is_staff', 'is_active')}
          ),
     )
     search_fields = ('email',)

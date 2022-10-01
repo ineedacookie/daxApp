@@ -8,7 +8,7 @@ from django.shortcuts import render
 from users.models import CustomUser  # Correct syntax
 
 from .forms import ReportsForm
-from .models import TimeActions
+from .models import InOutTimeActions
 
 SECONDS_IN_HOUR = 3600
 
@@ -119,14 +119,13 @@ def get_employee_list(company, employee_ids):
     if '-1' in employee_ids:
         employee_list = CustomUser.objects.filter(company=company).exclude(
             role="c").values('id', 'first_name', 'middle_name',
-                             'last_name', 'pay_rate').order_by('last_name',
+                             'last_name').order_by('last_name',
                                                                'first_name')
     else:
         employee_list = CustomUser.objects.filter(company=company).filter(id__in=employee_ids).values('id',
                                                                                                       'first_name',
                                                                                                       'middle_name',
-                                                                                                      'last_name',
-                                                                                                      'pay_rate').order_by(
+                                                                                                      'last_name').order_by(
             'last_name',
             'first_name')
 
@@ -141,8 +140,8 @@ def get_time_actions_list(form, employee_id_list, company, correct_timezone):
     full_beg_date, full_end_date = get_date_range(company.week_start_day, form['begin_date'], form['end_date'])
     filter_beg_date = convert_front_end_date_to_utc(full_beg_date, correct_timezone)
     filter_end_date = convert_front_end_date_to_utc(full_end_date, correct_timezone)
-    time_actions_list = TimeActions.objects.filter(user__in=employee_id_list).filter(
-        action_datetime__range=[filter_beg_date, filter_end_date]).order_by('user', 'action_datetime')
+    time_actions_list = InOutTimeActions.objects.filter(user__in=employee_id_list).filter(
+        date__range=[filter_beg_date, filter_end_date]).order_by('user', 'start')
     return full_beg_date.date(), full_end_date.date(), time_actions_list
 
 
@@ -170,16 +169,10 @@ class Report:
                             days: [
                                 {
                                     date: datetime object,
-                                    actions: [
-                                        {
-                                            type: clock or break,
-                                            first_action: type + time string ex 'In 09:10 AM',
-                                            second_action: type + time string ex 'Out 10:10 AM',
-                                            total: Float,
-                                            str_total: total stringified, if hour minute = 'H:MM' else 'H.hh'
-                                        }
-                                        ...   additional actions
-                                    ],
+                                    print_actions:[
+                                        type + time string ex 'In 09:10 AM',
+                                        ... additional actions
+                                    ]
                                     previous: Boolean,
                                     total: Float,
                                     break: Float,
@@ -217,8 +210,6 @@ class Report:
                     weekly_overtime: Float,
                     previous_total: Float,
                     previous_breaks: Float,
-                    pay_rate: float,
-                    pay_total: float,
                     total_with_break: Float,
                     regular: Float,
                     str_* for all float fields, replace * with the name of the field
@@ -278,7 +269,7 @@ class Report:
                 """If day is already started"""
                 if day_info:
                     """If the day has no changed then continue"""
-                    if day_info['date'] == time_action.action_datetime.date():
+                    if day_info['date'] == time_action.date.date():
                         day_info['actions'].append(time_action)
                     else:
                         """Otherwise add the day to the days array and calculate totals"""
@@ -371,22 +362,6 @@ class Report:
                            'previous_breaks', 'overtime', 'daily_overtime',
                            'weekly_overtime', 'break'])
 
-            emp_dict['pay_rate'] = employee['pay_rate']
-            pay_rate_for_calc = employee['pay_rate']
-
-            if employee['pay_rate'] and employee['pay_rate'] > 0:
-                if self.form['other_hours_format'] == 'hours_and_minutes':
-                    """converts pay rate so it is compatible with minutes"""
-                    pay_rate_for_calc = float(pay_rate_for_calc) / 60.0
-                if self.company_settings.breaks_are_paid:
-                    emp_dict['pay_total'] = float(emp_dict['total_with_break']) * float(pay_rate_for_calc)
-                else:
-                    emp_dict['pay_total'] = float(emp_dict['total']) * float(pay_rate_for_calc)
-                emp_dict['pay_total'] += float(emp_dict['overtime']) * float(employee['pay_rate']) * 0.5
-                if self.company_settings.double_time:
-                    emp_dict['pay_total'] += float(emp_dict['double_time']) * float(pay_rate_for_calc)
-            else:
-                emp_dict['pay_total'] = 0.0
             return_dict['employees'][employee_position] = emp_dict
             employee_position += 1
 
@@ -456,143 +431,86 @@ class Report:
         """Otherwise add the day to the days array"""
         """Calculate day totals"""
         day_info['date_str'] = day_info['date'].strftime('%a %m/%d/%y')
-        temp_day_info = day_info.copy()
-        temp_day_info['actions'] = []
-        prev_action = None
-        break_action = None
-        action_total = 0.0
-        day_overtime = 0.0
 
-        """Cycle through the clock actions and """
+        individual_actions = {}
+
         for action in day_info['actions']:
-            if prev_action:
-                if action.type == 'o' and prev_action.type == 'i':
-                    """If there is a clock out after a clock in add time to day total"""
-                    append_dict = self.add_action(action, prev_action)
-                    temp_day_info['actions'].append(append_dict)
-                elif action.type == 'b' and prev_action.type == 'i' and not break_action:
-                    """elif there is a begin break and no break actions set then set break_action symbolizing the employee is on break"""
-                    break_action = action
-                elif action.type == 'e' and break_action:
-                    """elif there is a end break and there is a break_action then calculate the break total"""
-                    append_dict = self.add_action(action, break_action)
-                    temp_day_info['actions'].insert(-1, append_dict)
-                    break_action = None
-
-                if action.type == 'i' or action.type == 'o':
-                    prev_action = action
+            if action.type == 't':
+                start_str = 'In'
+                end_str = 'Out'
+            elif action.type == 'b':
+                start_str = 'Begin Break',
+                end_str = 'End Break',
+            elif action.type == 'l':
+                start_str = 'Begin Lunch',
+                end_str = 'End Lunch',
             else:
-                """If the first entry of the day is an clock out, add an assumed clock in"""
-                if action.type == 'o':
-                    prev_action = AssumedTimeAction()
-                    prev_action.action_datetime = action.action_datetime
-                    prev_action.action_datetime = prev_action.action_datetime.replace(hour=0, minute=0, second=0,
-                                                                                      microsecond=0)
-                    prev_action.type = 'i'
+                start_str = 'ERROR in add_day'
+                end_str = 'ERROR in add_day'
 
-                    append_dict = self.add_action(action, prev_action)
-                    temp_day_info['actions'].append(append_dict)
+            individual_actions[action.start] = start_str + action.start.strftime("%I:%M %p")
+            individual_actions[action.end] = end_str + action.end.strftime("%I:%M %p")
 
-                elif action.type == 'b':
-                    prev_action = AssumedTimeAction()
-                    prev_action.action_datetime = action.action_datetime
-                    prev_action.action_datetime = prev_action.action_datetime.replace(hour=0, minute=0, second=0,
-                                                                                      microsecond=0)
-                    prev_action.type = 'i'
-                    break_action = action
+        day_info['print_actions'] = []
+        for i in sorted(individual_actions):
+            day_info['print_actions'].append(individual_actions[i])
 
-                elif action.type == 'e':
-                    """If the first entry of the day is an end break, add an assumed clock in and then add an assumed break in"""
-                    prev_action = AssumedTimeAction()
-                    prev_action.action_datetime = action.action_datetime
-                    prev_action.action_datetime = prev_action.action_datetime.replace(hour=0, minute=0, second=0,
-                                                                                      microsecond=0)
-                    prev_action.type = 'i'
-                    break_action = AssumedTimeAction()
-                    break_action.action_datetime = action.action_datetime
-                    break_action.action_datetime = break_action.action_datetime.replace(hour=0, minute=0, second=1,
-                                                                                        microsecond=0)
-                    break_action.type = 'b'
+        self.calc_day_totals(day_info)
+        day_info['actions'] = None
 
-                    append_dict = self.add_action(action, break_action)
-                    temp_day_info['actions'].insert(-1, append_dict)
-                    break_action = None
-            if action.type == 'i' or action.type == 'o':
-                prev_action = action
-
-        if prev_action:
-            """If the last action in the day is a clock in then add an assumed clocked out"""
-            if prev_action.type == 'i':
-                # TODO if this day is the same as the current day. then set the assumed clock out to the current time.
-                temp_action = AssumedTimeAction()
-                temp_action.action_datetime = prev_action.action_datetime
-                temp_action.action_datetime = temp_action.action_datetime.replace(hour=23, minute=59, second=59,
-                                                                                  microsecond=0)
-                temp_action.type = 'o'
-                append_dict = self.add_action(temp_action, prev_action)
-                temp_day_info['actions'].append(append_dict)
-            """If there is a break_action, it means the user is still on break, this adds an end break assumption."""
-            if break_action:
-                temp_action = AssumedTimeAction()
-                temp_action.action_datetime = break_action.action_datetime
-                temp_action.action_datetime = temp_action.action_datetime.replace(hour=23, minute=59, second=59,
-                                                                                  microsecond=0)
-                temp_action.type = 'e'
-                append_dict = self.add_action(temp_action, break_action)
-                temp_day_info['actions'].insert(-1, append_dict)
-
-            temp_day_info = self.calc_day_totals(temp_day_info)
-
-            days.append(temp_day_info)
-            day_info = {}
+        days.append(day_info)
+        day_info = {}
         return days, day_info
 
-    def calc_day_totals(self, temp_day_info):
+    def calc_day_totals(self, day_info):
         """Go through the actions and total up the daily total and break total for hourly and hour:minute"""
         if self.form['other_hours_format'] == 'decimal':
-            temp_day_info['total'] = 0.0
-            temp_day_info['break'] = 0.0
-            temp_day_info['overtime'] = 0.0
-            temp_day_info['daily_overtime'] = 0.0
-            temp_day_info['double_time'] = 0.0
+            day_info['total'] = 0.0
+            day_info['break'] = 0.0
+            day_info['overtime'] = 0.0
+            day_info['daily_overtime'] = 0.0
+            day_info['double_time'] = 0.0
         else:
-            temp_day_info['total'] = 0
-            temp_day_info['break'] = 0
-            temp_day_info['overtime'] = 0
-            temp_day_info['daily_overtime'] = 0
-            temp_day_info['double_time'] = 0
+            day_info['total'] = 0
+            day_info['break'] = 0
+            day_info['overtime'] = 0
+            day_info['daily_overtime'] = 0
+            day_info['double_time'] = 0
 
-        for action in temp_day_info['actions']:
-            if action['type'] == 'clock':
-                temp_day_info['total'] += action['total']
+        for action in day_info['actions']:
+            if action.type == 't':
+                day_info['total'] += action.total_time
+            elif action.type == 'b':
+                day_info['break'] += action.total_time
+                day_info['total'] -= action.total_time
             else:
-                temp_day_info['break'] += action['total']
-                temp_day_info['total'] -= action['total']
+                day_info['break'] += action.total_time
+                day_info['total'] -= action.total_time
 
         """If daily overtime calculate overtime for the day, and possibly double time"""
         if self.company_settings.daily_overtime:
             """Adjust this if you want breaks to count towards overtime"""
             if self.company_settings.include_breaks_in_overtime_calculation:
-                actual_time = temp_day_info['total'] + temp_day_info['break']
+                actual_time = day_info['total'] + day_info['break']
             else:
-                actual_time = temp_day_info['total']
+                actual_time = day_info['total']
             calc_daily_overtime_value = self.company_settings.daily_overtime_value
             if self.form['other_hours_format'] == 'hours_and_minutes':
                 calc_daily_overtime_value = calc_daily_overtime_value * 60
             if actual_time > calc_daily_overtime_value:
-                temp_day_info['overtime'] = actual_time - calc_daily_overtime_value
+                day_info['overtime'] = actual_time - calc_daily_overtime_value
             if self.company_settings.double_time:
                 calc_double_time_value = self.company_settings.double_time_value
                 if self.form['other_hours_format'] == 'hours_and_minutes':
                     calc_double_time_value = calc_double_time_value * 60
                 if actual_time > calc_double_time_value:
-                    temp_day_info['double_time'] = actual_time - calc_double_time_value
-                    temp_day_info['overtime'] = temp_day_info['overtime'] - temp_day_info['double_time']
-            temp_day_info['daily_overtime'] = temp_day_info['overtime']
+                    day_info['double_time'] = actual_time - calc_double_time_value
+                    day_info['overtime'] = day_info['overtime'] - day_info['double_time']
+            day_info['daily_overtime'] = day_info['overtime']
 
-        temp_day_info['total_with_break'] = temp_day_info['total'] + temp_day_info['break']
+        day_info['total_with_break'] = day_info['total'] + day_info['break']
 
-        temp_day_info = self.convert_to_string(temp_day_info,
+        temp_day_info = self.convert_to_string(day_info,
                                                ['total', 'break', 'overtime', 'daily_overtime', 'double_time',
                                                 'total_with_break'])
 

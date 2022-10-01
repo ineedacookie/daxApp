@@ -163,11 +163,11 @@ class EmployeeForm(ModelForm):
         super(EmployeeForm, self).__init__(*args, **kwargs)
         self.label_suffix = ""
         # Go through each of these fields and give them the form-control class
-        for name in ["first_name", "middle_name", "last_name", "email", "pay_rate"]:
+        for name in ["first_name", "middle_name", "last_name", "email"]:
             self.fields[name].widget.attrs["class"] = "form-control"
         # Go through each of these fields that are the "last" of an input group and round their right side
         # Normally, bootstrap handles for this, but the div.invalid-feedback elements cause a problem
-        for name in ["pay_rate"]:
+        for name in []:
             self.fields[name].widget.attrs["class"] += " rounded-right"
 
     class Meta:
@@ -176,8 +176,7 @@ class EmployeeForm(ModelForm):
             'first_name',
             'middle_name',
             'last_name',
-            'email',
-            'pay_rate'  # TODO: specify minimum to be 0 (allow for null, still?)
+            'email'
         )
 
 

@@ -9,8 +9,8 @@ from django.contrib import messages
 from django.utils import timezone
 from users.models import CustomUser  # this is correct syntax
 
-from .forms import TimeActionForm, ReportsForm, BaseTimeActionFormSet
-from .models import TimeActions
+from .forms import InOutTimeActionsForm, ReportsForm, BaseTimeActionFormSet
+from .models import InOutTimeActions
 from .utils import generate_report, get_timezone, get_month_range_in_timezone, get_day_range_in_timezone, \
     convert_front_end_date_to_utc
 
@@ -182,7 +182,7 @@ def create_time_action(request, employee_id, selected_date=timezone.now().strfti
                         request))
                 return redirect('home')
             if request.POST:
-                form = TimeActionForm(request.POST)
+                form = InOutTimeActionsForm(request.POST)
                 if form.is_valid():
                     time_action = form.save(commit=False)
                     time_action.user = employee
@@ -196,7 +196,7 @@ def create_time_action(request, employee_id, selected_date=timezone.now().strfti
                         return redirect(request.path.replace('time_action_create', 'modify_times'))
                 else:
                     messages.warning(request, 'Please fix the error below')
-            page_arguments['form'] = TimeActionForm(initial={'action_datetime': selected_date})
+            page_arguments['form'] = InOutTimeActionsForm(initial={'action_datetime': selected_date})
         else:
             messages.warning(request, 'You cannot add times for an employee that does not belong to your company')
             return redirect('home')
@@ -218,12 +218,12 @@ def edit_time_action(request, time_action_id):
     if request.user.is_staff:
         return redirect('/io_admin')
     elif role == "c" or role == "r":
-        time_action = TimeActions(id=time_action_id)
+        time_action = InOutTimeActions(id=time_action_id)
         if time_action.user.company == request.user.company:
             correct_timezone = get_timezone(request.user, time_action.user)
             page_arguments['correct_timezone'] = correct_timezone.zone
             if request.POST:
-                form = TimeActionForm(request.POST, initial=time_action)
+                form = InOutTimeActionsForm(request.POST, initial=time_action)
                 if form.is_valid():
                     edited_action = form.save(commit=False)
                     edited_action.action_datetime = convert_front_end_date_to_utc(edited_action.action_datetime,
@@ -234,7 +234,7 @@ def edit_time_action(request, time_action_id):
                 else:
                     messages.warning(request, 'Please fix the error below')
 
-            page_arguments['form'] = TimeActionForm(initial=time_action)
+            page_arguments['form'] = InOutTimeActionsForm(initial=time_action)
         else:
             messages.warning(request, 'You cannot edit times for an employee that does not belong to your company')
             return redirect('home')

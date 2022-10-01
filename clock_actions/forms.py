@@ -2,7 +2,7 @@ from django import forms
 from django.forms import HiddenInput, ModelForm, CharField, Form, DateInput
 from users.models import CustomUser  # this is correct syntax
 
-from .models import TimeActions
+from .models import InOutTimeActions
 
 
 class NewDateInput(DateInput):
@@ -25,10 +25,6 @@ class ReportsForm(Form):
     display_week_totals = forms.BooleanField(required=False, initial=True)  # TODO: style
     display_employee_totals = forms.BooleanField(required=False, initial=True)  # TODO: style
     display_grand_totals = forms.BooleanField(required=False, initial=True)  # TODO: style
-    display_employee_pay_total = forms.BooleanField(required=False, initial=True)  # TODO: style
-    display_employee_pay_rate = forms.BooleanField(required=False,
-                                                   initial=True)  # should not be active unless employee_pay_total is active  # TODO: style
-    display_grand_pay_total = forms.BooleanField(required=False, initial=True)  # TODO: style
     display_employee_comments = forms.BooleanField(required=False, initial=False)  # TODO: style
     add_employee_signature_line = forms.BooleanField(required=False, initial=False)  # TODO: style
     add_supervisor_signature_line = forms.BooleanField(required=False, initial=False)  # TODO: style
@@ -80,16 +76,19 @@ class ReportsForm(Form):
 
         # Go through the checkboxes and give them this class
         for name in ["display_clock_actions", "display_day_totals", "display_week_totals", "display_employee_totals",
-                     "display_grand_totals", "display_employee_pay_total", "display_employee_pay_rate",
-                     "display_grand_pay_total", "display_employee_comments", "add_employee_signature_line",
+                     "display_grand_totals", "display_employee_comments", "add_employee_signature_line",
                      "add_supervisor_signature_line", "add_other_signature_line", "other_new_page_for_each_employee",
                      "other_memo", "other_space_on_right"]:
             self.fields[name].widget.attrs["class"] = "custom-control-input"
 
 
-class TimeActionForm(ModelForm):
+class InOutTimeActionsForm(ModelForm):
     # TODO possibly create a clean up function and possibly a validation function
-    action_datetime = forms.SplitDateTimeField(widget=forms.SplitDateTimeWidget(
+    start = forms.SplitDateTimeField(widget=forms.SplitDateTimeWidget(
+        date_attrs=({'type': 'date'}),
+        time_attrs=({'type': 'time'})
+    ))
+    end = forms.SplitDateTimeField(widget=forms.SplitDateTimeWidget(
         date_attrs=({'type': 'date'}),
         time_attrs=({'type': 'time'})
     ))
@@ -98,13 +97,13 @@ class TimeActionForm(ModelForm):
         super(ModelForm, self).__init__(*args, **kwargs)
 
         self.label_suffix = ""
-        for name in ["type", "action_datetime", "comment"]:
+        for name in ["type", "start", 'end', "comment"]:
             self.fields[name].widget.attrs["class"] = "form-control"
         self.fields["comment"].widget.attrs["rows"] = 3
 
     class Meta:
-        model = TimeActions
-        fields = ('type', 'action_datetime', 'comment')
+        model = InOutTimeActions
+        fields = ('type', 'start', 'end', 'comment')
 
 
 class EmployeeTimeActionForm(ModelForm):
@@ -122,8 +121,8 @@ class EmployeeTimeActionForm(ModelForm):
         }
 
     class Meta:
-        model = TimeActions
+        model = InOutTimeActions
         fields = ('type', 'comment')
 
 
-BaseTimeActionFormSet = forms.modelformset_factory(TimeActions, form=TimeActionForm, extra=0, can_delete=True)
+BaseTimeActionFormSet = forms.modelformset_factory(InOutTimeActions, form=InOutTimeActionsForm, extra=0, can_delete=True)

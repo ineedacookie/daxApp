@@ -54,13 +54,11 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=100, help_text="Employees Last Name", blank=False, null=True)
     role = models.CharField(max_length=1, help_text="The role of the user within the company", null=True, default="e",
                             blank=True, choices=(('e', 'Employee'), ('c', 'Company Admin'), ('r', 'Restricted Admin')))
-    pay_rate = models.DecimalField(decimal_places=2, max_digits=6, blank=False, default=0)
     theme = models.IntegerField(default=1, blank=True, null=True)
-    wp_id = models.CharField(max_length=50, help_text="Wordpress ID", blank=True, null=True)
     timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
     verified = models.BooleanField(default=False, blank=True, null=True)
     created_date = models.DateField(_("Date"), auto_now_add=True, blank=True, null=True)
-    time_action = models.ForeignKey('clock_actions.TimeActions', on_delete=models.SET_NULL, default=None, null=True,
+    time_action = models.ForeignKey('clock_actions.InOutTimeActions', on_delete=models.SET_NULL, default=None, null=True,
                                     blank=True)
 
     USERNAME_FIELD = 'email'
@@ -69,5 +67,20 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.email
+        return self.email  # TODO rather than return self.email perhaps we can return the name.
 
+
+# class Department(models.Model):
+#     code = models.CharField(max_length=50, help_text="Department Code", blank=False, default="")
+#     name = models.CharField(max_length=255, help_text="Department Name", blank=False)
+#     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+#     members = models.ManyToManyField(CustomUser, null=True)
+#     department_heads = models.ManyToManyField(CustomUser, null=True)
+#     created_date = models.DateField(_("Date"), auto_now_add=True, blank=True)
+#
+#     def __str__(self):
+#         temp_str = ''
+#         if str(self.code):
+#             temp_str += str(self.code) + ' '
+#         temp_str += str(self.name)
+#         return temp_str
