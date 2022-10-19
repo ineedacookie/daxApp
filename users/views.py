@@ -23,6 +23,7 @@ from django.conf import settings
 from .utils import urlsafe_base64_encode, check_employee_form
 from clock_actions.utils import get_timezone
 
+logger = logging.getLogger("django.request")
 
 @login_required
 def home(request):

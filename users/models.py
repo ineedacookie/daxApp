@@ -18,7 +18,7 @@ class Company(models.Model):
     name = models.CharField(max_length=255, help_text="Company Name", blank=False)
     pay_period_type = models.CharField(max_length=1, help_text="Pay period type", default="w", blank=False, choices=(
         ('w', 'Weekly'), ('b', 'Bi-Weekly'), ('s', 'Semi-Monthly'), ('m', 'Monthly')))
-    period_begin_date = models.DateField(default=grab_begin_date, blank=False)
+    period_begin_date = models.DateField(default=grab_begin_date, blank=True)
     week_start_day = models.IntegerField(default=0, blank=False, choices=(
     (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')))
     weekly_overtime = models.BooleanField(default=True)
@@ -54,7 +54,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=100, help_text="Employees Last Name", blank=False, null=True)
     role = models.CharField(max_length=1, help_text="The role of the user within the company", null=True, default="e",
                             blank=True, choices=(('e', 'Employee'), ('c', 'Company Admin'), ('r', 'Restricted Admin')))
-    pay_rate = models.DecimalField(decimal_places=2, max_digits=6, blank=False, default=0)
+    pay_rate = models.DecimalField(decimal_places=2, max_digits=6, blank=True, default=0)
     theme = models.IntegerField(default=1, blank=True, null=True)
     wp_id = models.CharField(max_length=50, help_text="Wordpress ID", blank=True, null=True)
     timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
