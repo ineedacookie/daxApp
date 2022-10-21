@@ -34,11 +34,6 @@ urlpatterns += [
     path('', include('users.urls')),
 ]
 
-# Add clock_actions module
-urlpatterns += [
-    path('', include('clock_actions.urls'))
-]
-
 # Add feedback module
 urlpatterns += [
     path('', include('feedback.urls'))

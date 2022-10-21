@@ -48,14 +48,10 @@ INSTALLED_APPS = [
     'crispy_forms',
 
     'users',  # Custom Users dg 4/9/20
-    'clock_actions',  # Clock Actions Module dg 4/13/20
     'feedback', # Feedback Module dg 5/19/20
     'admin_auto_filters',   # additional admin functionality django admin dg 5/12/2020
     'log_viewer',   # additional admin functionality for viewing a log file dg 5/13/2020
-]
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'  # by default, it is bootstrap 2 (not 4), this specification is required
-CRISPY_FAIL_SILENTLY = not DEBUG     # by default, it always fails silently. Makes things easier to debug like this
+]   # by default, it always fails silently. Makes things easier to debug like this
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -136,7 +132,7 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )

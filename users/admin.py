@@ -12,25 +12,30 @@ class CompanyFilter(AutocompleteFilter):
     field_name = 'company'
 
 
+class UserFilter(AutocompleteFilter):
+    title = 'User'
+    field_name = 'user'
+
+
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
 
-    list_display = ('email', 'company', 'is_staff', 'is_active', 'time_action', 'created_date')
-    list_filter = (CompanyFilter, 'is_staff', 'is_active', 'created_date')
+    list_display = ('email', 'company', 'is_active', 'created_date')
+    list_filter = (CompanyFilter, 'is_active', 'created_date', 'is_staff')
     fieldsets = (
         (None, {'fields': (
-        'email', 'password', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'wp_id', 'timezone',
-        'verified', 'time_action', 'pay_rate')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        'email', 'password', 'first_name', 'middle_name', 'last_name', 'change_email', 'theme', 'timezone',
+        'verified')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
             'fields': (
-            'company', 'email', 'first_name', 'middle_name', 'last_name', 'role', 'theme', 'wp_id', 'timezone',
-            'verified', 'password1', 'password2', 'pay_rate', 'is_staff', 'is_active')}
+            'company', 'email', 'first_name', 'middle_name', 'last_name', 'theme', 'timezone',
+            'verified', 'password1', 'password2', 'is_staff', 'is_active')}
          ),
     )
     search_fields = ('email',)
@@ -43,8 +48,8 @@ class CustomUserAdmin(UserAdmin):
 
 class CompanyAdmin(admin.ModelAdmin):
     change_form_template = 'io_admin/change_form.html'
-    list_display = ('id', 'name', 'last_renew_date', 'created_date')
-    list_filter = ('id', 'name', 'last_renew_date', 'created_date')
+    list_display = ('id', 'name', 'created_date')
+    list_filter = ('id', 'name', 'created_date')
     search_fields = ('name',)
     ordering = ('-id',)
 
