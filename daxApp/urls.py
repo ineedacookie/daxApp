@@ -38,3 +38,6 @@ urlpatterns += [
 urlpatterns += [
     path('', include('feedback.urls'))
 ]
+
+handler404 = 'users.views.handler404'
+handler500 = 'users.views.handler500'

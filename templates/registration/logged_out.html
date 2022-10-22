@@ -1,0 +1,14 @@
+{% extends "general/card.html" %}
+{% load static %}
+{% block title %}Logged out{% endblock %}
+{% block card_body %}
+<div class="text-center"><img class="d-block mx-auto mb-4"
+                              src="{% static 'assets/img/icons/spot-illustrations/45.png' %}" alt="shield"
+                              width="100"/>
+    <h4>See you again!</h4>
+    <p>Thanks for using Falcon. You are <br/>now successfully signed out.</p><a
+            class="btn btn-primary btn-sm mt-3"
+            href="{% url 'login'%}"><span
+            class="fas fa-chevron-left me-1" data-fa-transform="shrink-4 down-1"></span>Return to Login</a>
+</div>
+{% endblock %}

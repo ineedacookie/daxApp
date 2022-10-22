@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
-from .forms import CompanyForm, UserForm, OverriddenPasswordChangeForm, OverriddenAdminPasswordChangeForm
+from .forms import CompanyForm, UserForm, OverriddenPasswordChangeForm, OverriddenAdminPasswordChangeForm, RegisterUserForm
 from .models import CustomUser
 from .tokens import account_activation_token
 from django.template.loader import render_to_string
@@ -24,33 +24,64 @@ logger = logging.getLogger("django.request")
 
 
 def landing_page(request):
-    page = 'landing.html'
+    page = 'general/landing.html'
     page_arguments = {}
     return render(request, page, page_arguments)
 
 
-# @login_required
-# def home(request):
-#     """Main page that is the root of the website"""
-#     """check that the user is logged in. if not send them to the log in page."""
-#     if not request.user.password:
-#         return create_account(request)
-#
-#     page = 'employee_home_page.html'
-#     page_arguments = {}
-#     role = request.user.role
-#
-#     """Checks whether the user is a timeclick employee, an employee, or an admin"""
-#     if request.user.is_staff:
-#         return redirect('/io_admin')
-#     elif role == 'e' or role == "c" or role == "r":
-#         """this is the place to update if you want the admin to control where they go initally when opening admin mode."""
-#         return redirect('dashboard')
-#     else:
-#         logger.error(
-#             'Someone without a role that is not an admin was trying to access the site \n \n User Info:' + str(
-#                 request.user))
-#     return render(request, page, page_arguments)  # fill the {} with arguments
+@login_required
+def home(request):
+    """Main page that is the root of the website"""
+    """check that the user is logged in. if not send them to the log in page."""
+    # if not request.user.password:
+    #     return create_account(request)
+
+    page = 'general/home.html'
+    page_arguments = {}
+
+    """Checks whether the user is part of the staff or a customer"""
+    if request.user.is_staff:
+        return redirect('/io_admin')
+    else:
+        return render(request, page, page_arguments)  # fill the {} with arguments
+
+
+def register_account(request):
+    """This view allows a new user to register for an account not linked to any company."""
+    page = 'registration/register.html'
+    page_arguments = {}
+    form = None
+    if request.method == 'POST':
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            register_user = form.save(commit=False)
+            register_user.is_active = False
+            register_user.save()
+
+            current_site = get_current_site(request)
+            mail_subject = 'Activate Account.'
+            message = render_to_string('email/acc_active_email.html', {
+                'user': register_user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(register_user.pk)),
+                'token': account_activation_token.make_token(register_user),
+            })
+            to_email = form.cleaned_data.get('email')
+            send_mail(
+                mail_subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [to_email],
+                fail_silently=False,
+            )
+            page = 'registration/account_created.html'
+            page_arguments = {}
+        else:
+            page_arguments['form'] = form
+
+    if not form:
+        page_arguments['form'] = RegisterUserForm()
+    return render(request, page, page_arguments)
 #
 #
 # @login_required
@@ -542,18 +573,38 @@ def landing_page(request):
 #
 #
 def activate(request, uidb64, token):
+    """This page is for validating an email and getting the initial password set for a user."""
+    page = 'registration/activation_link.html'
+    page_arguments = {}
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = CustomUser.objects.get(pk=uid)
     except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
         user = None
     if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        if user.change_email:
-            user.email = user.change_email
-            user.change_email = None
-        user.save()
-        login(request, user)
-        return redirect('home')
-    else:
-        return render(request, 'activation_link.html')
+        page = 'registration/set_initial_password.html'
+        if request.POST:
+            form = OverriddenAdminPasswordChangeForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                user.is_active = True
+                if user.change_email:
+                    user.email = user.change_email
+                    user.change_email = None
+                user.save()
+                login(request, user)
+                return redirect('home')
+        else:
+            form = OverriddenAdminPasswordChangeForm(user)
+        page_arguments['form'] = form
+    return render(request, page, page_arguments)
+
+
+def handler404(request, *args, **argv):
+    page = 'general/404.html'
+    return render(request, page, {}, status=404)
+
+
+def handler500(request, *args, **argv):
+    page = 'general/500.html'
+    return render(request, page, {}, status=500)

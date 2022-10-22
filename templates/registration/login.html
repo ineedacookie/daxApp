@@ -1,0 +1,75 @@
+{% extends "general/card.html" %}
+{% block title %}Login{% endblock %}
+{% block alerts_above_card %}
+{% if form.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <p>Your email and password didn't match. Please try again.</p>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+
+{% if next %}
+{% if user.is_authenticated %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <p>Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.</p>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% else %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <p>Please login to see this page.</p>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+{% block card_body %}
+<div class="row flex-between-center mb-2">
+    <div class="col-auto">
+        <h5>Log in</h5>
+    </div>
+    <div class="col-auto fs--1 text-600"><span class="mb-0 undefined">or</span> <span><a
+            href="{% url 'register' %}">Create an account</a></span></div>
+</div>
+<form method="post" action="{% url 'login' %}" id="content">
+    {% csrf_token %}
+    <div class="mb-3">
+        <input class="form-control" type="text" name="username" autofocus="" autocapitalize="none" autocomplete="email"
+               maxlength="254" required="" id="id_username" placeholder="Email address"/>
+    </div>
+    <div class="mb-3">
+        <input class="form-control" type="password" name="password" autocomplete="current-password" required=""
+               id="id_password" placeholder="Password">
+    </div>
+    <div class="row flex-between-center">
+        <div class="col-auto">
+            <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="basic-checkbox" checked="checked"/>
+                <label class="form-check-label mb-0" for="basic-checkbox">Remember me</label>
+            </div>
+        </div>
+        <div class="col-auto"><a class="fs--1" href="{% url 'password_reset' %}">Forgot Password?</a>
+        </div>
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Log in</button>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}"/>
+</form>
+<div class="position-relative mt-4">
+    <hr/>
+    <div class="divider-content-center">or log in with</div>
+</div>
+<div class="row g-2 mt-2">
+    <div class="col-sm-6"><a class="btn btn-outline-google-plus btn-sm d-block w-100" href="#"><span
+            class="fab fa-google-plus-g me-2" data-fa-transform="grow-8"></span> google</a></div>
+    <div class="col-sm-6"><a class="btn btn-outline-facebook btn-sm d-block w-100" href="#"><span
+            class="fab fa-facebook-square me-2" data-fa-transform="grow-8"></span> facebook</a></div>
+</div>
+{% endblock %}

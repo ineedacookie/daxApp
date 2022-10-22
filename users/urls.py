@@ -8,8 +8,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    # path('', views.home, name='home'),
-    path('landing/', views.landing_page, name="landing_page")
+    path('', views.home, name='home'),
+    path('landing/', views.landing_page, name="landing_page"),
+    path('register/', views.register_account, name="register"),
     # path('dashboard/', views.dashboard, name="dashboard"),
     # path('admin/company_settings/', views.company_settings, name="company_settings"),
     # path('admin/create_employee/', views.create_employee, name="create_employee"),

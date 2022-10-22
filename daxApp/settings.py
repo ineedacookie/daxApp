@@ -88,6 +88,7 @@ WSGI_APPLICATION = 'daxApp.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -150,7 +151,7 @@ DEFAULT_FROM_EMAIL = 'graydax@gmail.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'graydax@gmail.com'
-EMAIL_HOST_PASSWORD = 'Pinac1Pine@pple'
+EMAIL_HOST_PASSWORD = 'folqufzxkokcfydg'
 EMAIL_USE_TLS = True
 
 PASSWORD_RESET_TIMEOUT_DAYS = 7

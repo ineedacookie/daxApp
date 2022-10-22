@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm, PasswordChangeForm
-from django.forms import EmailField, ModelForm
+from django.forms import EmailField, ModelForm, BooleanField
 
 from .models import CustomUser, Company, CompanyConnection
 
@@ -53,4 +53,15 @@ class UserForm(ModelForm):
             'last_name',
             'email',
             'timezone'
+        )
+
+
+class RegisterUserForm(ModelForm):
+    agree_to_terms_and_conditions = BooleanField(required=True)
+    class Meta:
+        model = CustomUser
+        fields = (
+            'first_name',
+            'last_name',
+            'email'
         )

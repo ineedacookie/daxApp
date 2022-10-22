@@ -20,7 +20,7 @@ class Company(models.Model):
 
 
 class CustomUser(AbstractUser):
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True)
     username = None
     email = models.EmailField(_('Email'), unique=True)
     change_email = models.EmailField(null=True, blank=True, default=None)

@@ -1,0 +1,12 @@
+{% extends "general/card.html" %}
+{% load static %}
+{% block title %}Invalid Activation Link{% endblock %}
+{% block card_body %}
+<div class="text-center">
+    <h1 class="h2 m-3">This activation link is no longer valid</h1>
+    <p>Please log in or contact your supervisor.</p>
+    <a class="btn btn-primary btn-sm mt-3" href="{% url 'login'%}"><span class="fas fa-chevron-left me-1"
+                                                                         data-fa-transform="shrink-4 down-1"></span>Return
+        to login</a>
+</div>
+{% endblock %}
