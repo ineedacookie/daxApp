@@ -49,7 +49,7 @@ class CustomUserAdmin(UserAdmin):
 class CompanyAdmin(admin.ModelAdmin):
     change_form_template = 'io_admin/change_form.html'
     list_display = ('id', 'name', 'created_date')
-    list_filter = ('id', 'name', 'created_date')
+    list_filter = ('id', 'name', 'paying', 'created_date')
     search_fields = ('name',)
     ordering = ('-id',)
 

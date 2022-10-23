@@ -41,7 +41,7 @@ class OverriddenPasswordChangeForm(PasswordChangeForm):
 class CompanyForm(ModelForm):
     class Meta:
         model = Company
-        fields = ('name', 'timezone', 'use_company_timezone', 'default_theme')
+        fields = ('name', 'timezone', 'use_company_timezone')
 
 
 class UserForm(ModelForm):

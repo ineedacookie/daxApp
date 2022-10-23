@@ -4,7 +4,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from users.models import Company, CustomUser
 
 
 def grab_begin_date():
@@ -15,7 +14,7 @@ def grab_begin_date():
 class InOutAction(models.Model):
     """Tracks the In and out time actions of users"""
     """Controls all the time actions and keeps them in a nice neat table."""
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=False, blank=False)
     start = models.DateTimeField(blank=True, null=True, default=timezone.now)  # the start datetime of the action
     end = models.DateTimeField(blank=True, null=True)  # the end datetime of the action
     total_time = models.FloatField(default=0, null=True,
@@ -72,7 +71,7 @@ class InOutAction(models.Model):
 
 class TTCompanyInfo(models.Model):
     """Tracks the company information used for the time_tracker"""
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=False, blank=False)
+    company = models.ForeignKey('users.Company', on_delete=models.CASCADE, null=False, blank=False)
     pay_period_type = models.CharField(max_length=1, help_text="Pay period type", default="w", blank=False, choices=(
         ('w', 'Weekly'), ('b', 'Bi-Weekly'), ('s', 'Semi-Monthly'), ('m', 'Monthly')))
     period_begin_date = models.DateField(default=grab_begin_date, blank=False)
@@ -92,15 +91,17 @@ class TTCompanyInfo(models.Model):
     breaks_are_paid = models.BooleanField(default=False, blank=True)
     include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
     display_employee_times_with_timezone = models.BooleanField(default=False, blank=True)
-    created_date = models.DateField(_("Date"), auto_now_add=True, blank=True)
+    created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)
+    updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
     def __str__(self):
         return self.company.name
 
 
 class TTUserInfo(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False, blank=False)
-    time_action = models.ForeignKey('clock_actions.InOutTimeActions', on_delete=models.SET_NULL, default=None,
+    user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=False, blank=False)
+    time_action = models.ForeignKey(InOutAction, on_delete=models.SET_NULL, default=None,
                                     null=True,
                                     blank=True)
-    created_date = models.DateField(_("Date"), auto_now_add=True, blank=True, null=True)
+    created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
+    updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
