@@ -78,18 +78,18 @@ class TTCompanyInfo(models.Model):
     week_start_day = models.IntegerField(default=0, blank=False, choices=(
         (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'),
         (6, 'Sunday')))
-    weekly_overtime = models.BooleanField(default=True)
-    weekly_overtime_value = models.IntegerField(default=40, validators=[MaxValueValidator(120), MinValueValidator(0)],
+    default_weekly_overtime = models.BooleanField(default=True)
+    default_weekly_overtime_value = models.IntegerField(default=40, validators=[MaxValueValidator(120), MinValueValidator(0)],
                                                 blank=True)
-    daily_overtime = models.BooleanField(default=False)
-    daily_overtime_value = models.IntegerField(default=8, validators=[MaxValueValidator(23), MinValueValidator(0)],
+    default_daily_overtime = models.BooleanField(default=False)
+    default_daily_overtime_value = models.IntegerField(default=8, validators=[MaxValueValidator(23), MinValueValidator(0)],
                                                blank=True)
-    double_time = models.BooleanField(default=False)
-    double_time_value = models.IntegerField(default=12, validators=[MaxValueValidator(23), MinValueValidator(1)],
+    default_double_time = models.BooleanField(default=False)
+    default_double_time_value = models.IntegerField(default=12, validators=[MaxValueValidator(23), MinValueValidator(1)],
                                             blank=True)
-    enable_breaks = models.BooleanField(default=True)
-    breaks_are_paid = models.BooleanField(default=False, blank=True)
-    include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
+    default_enable_breaks = models.BooleanField(default=True)
+    default_breaks_are_paid = models.BooleanField(default=False, blank=True)
+    default_include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
     display_employee_times_with_timezone = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
@@ -103,5 +103,32 @@ class TTUserInfo(models.Model):
     time_action = models.ForeignKey(InOutAction, on_delete=models.SET_NULL, default=None,
                                     null=True,
                                     blank=True)
+    use_company_default_overtime_settings = models.BooleanField(default=True, null=True, blank=True)
+    weekly_overtime = models.BooleanField(default=None, null=True, blank=True)
+    weekly_overtime_value = models.IntegerField(default=None,
+                                                        validators=[MaxValueValidator(120), MinValueValidator(0)],
+                                                        blank=True, null=True)
+    daily_overtime = models.BooleanField(default=None)
+    daily_overtime_value = models.IntegerField(default=None,
+                                                       validators=[MaxValueValidator(23), MinValueValidator(0)],
+                                                       blank=True, null=True)
+    double_time = models.BooleanField(default=None, null=True, blank=True)
+    double_time_value = models.IntegerField(default=None,
+                                                    validators=[MaxValueValidator(23), MinValueValidator(1)],
+                                                    blank=True, null=True)
+    use_company_default_break_settings = models.BooleanField(default=True, null=True, blank=True)
+    enable_breaks = models.BooleanField(default=None, null=True, blank=True)
+    breaks_are_paid = models.BooleanField(default=None, blank=True, null=True)
+    include_breaks_in_overtime_calculation = models.BooleanField(default=None, blank=True, null=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        tt_company = TTCompanyInfo.objects.filter(company=self.user.company)
+        if tt_company:
+            tt_company = tt_company[0]
+            for i in ['weekly_overtime', 'weekly_overtime_value', 'daily_overtime', 'daily_overtime_value', 'double_time', 'double_time_value',
+                      'enable_breaks', 'breaks_are_paid', 'include_breaks_in_overtime_calculation']:
+                if getattr(self, i) is None:
+                    setattr(self, i, getattr(tt_company, 'default_' + i))
+        super().save(*args, **kwargs)
