@@ -3,6 +3,7 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+from time_tracker.models import TTUserInfo, TTCompanyInfo
 
 from .forms import *
 from .utils import check_employee_form
@@ -23,7 +24,6 @@ class UsersManagersTests(TestCase):
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
-        self.assertTrue(user.theme == 1)
         try:
             # username is None for the AbstractUser option
             # username does not exist for the AbstractBaseUser option
@@ -95,6 +95,50 @@ class CompanyModelTests(TestCase):
         # assert that employees still exist as individuals when the company is deleted.
         users = CustomUser.objects.all()
         self.assertEqual(users.count(), 20)
+
+
+
+class ModelsTest(TestCase):
+    """
+    Things to test:
+        1. Creating a user without a company creates a company and a link to the company as the company admin.
+        2. Creating a company create a TTCompanyInfo
+        3. Creating a user creates a TTUserInfo
+        4. Creating a user with a company doesn't create a company or a link to the company
+    """
+
+    def test_user_without_company(self):
+        test_user = CustomUser.objects.create(first_name='temp', last_name='employee', email='tempployee@test.com')
+        self.assertTrue(test_user.company is not None)
+        connections = CompanyConnection.objects.filter(company=test_user.company, user=test_user)
+        self.assertTrue(connections)
+        self.assertTrue(connections[0].role == 'c')
+
+        company_info = TTCompanyInfo.objects.filter(company=test_user.company)
+        self.assertTrue(company_info)
+
+        user_info = TTUserInfo.objects.filter(user=test_user)
+        self.assertTrue(user_info)
+
+        # delete company to delete the connections but retain the user.
+        test_user.company.delete()
+        test_user = CustomUser.objects.filter(id=test_user.id)[0]
+        self.assertTrue(not test_user.company)
+        connections = CompanyConnection.objects.filter(user=test_user)
+        self.assertTrue(not connections)
+
+    def test_user_with_company(self):
+        """When a user belongs to a company I am expecting that our code will create the connection as well at the time of adding the employee."""
+        test_company = Company.objects.create(name="AMAZING COMPANY")
+        test_user = CustomUser.objects.create(first_name='ted', last_name='Great', email="great@ted.com", company=test_company)
+        self.assertTrue(test_company == test_user.company)
+        connections = CompanyConnection.objects.filter(user=test_user)
+        self.assertTrue(not connections)
+
+        # the new user should however have a time tracking model
+        user_info = TTUserInfo.objects.filter(user=test_user)
+        self.assertTrue(user_info)
+
 
 
 

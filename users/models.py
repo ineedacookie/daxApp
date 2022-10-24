@@ -18,7 +18,7 @@ class Company(models.Model):
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return str(self.name) + ' #' + str(self.pk)
 
     def save(self, *args, **kwargs):
         """Overridding so that we can create other necessary models off of this one. Like TTCompany Info for time tracking."""
@@ -26,7 +26,7 @@ class Company(models.Model):
         super().save(*args, **kwargs)
         if created:
             # this is created for the first time, so we need to initialize other modals
-            TTCompanyInfo.objects.create(data={'company': self})
+            TTCompanyInfo.objects.create(company=self)
 
 
 class CustomUser(AbstractUser):
@@ -53,13 +53,13 @@ class CustomUser(AbstractUser):
     def save(self, *args, **kwargs):
         created = not self.pk
         super().save(*args, **kwargs)
+        if not self.company:
+            # This is the first instance of this employee lets give them a company if they don't already have one.
+            company = Company.objects.create()
+            CompanyConnection.objects.create(company=company, user=self, role='c')
+            self.company = company
         if created:
-            if not self.company:
-                # This is the first instance of this employee lets give them a company if they don't already have one.
-                company = Company.objects.create()
-                CompanyConnection.objects.create(data={'company': company, 'user': self, 'role': 'c'})
-                self.company = company
-            TTUserInfo.objects.create(data={'user': self})
+            TTUserInfo.objects.create(user=self)
 
 
 class CompanyConnection(models.Model):

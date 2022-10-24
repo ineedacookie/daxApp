@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from admin_auto_filters.filters import AutocompleteFilter
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser, Company
+from .models import CustomUser, Company, CompanyConnection
 
 
 class CompanyFilter(AutocompleteFilter):
@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = (CompanyFilter, 'is_active', 'created_date', 'is_staff')
     fieldsets = (
         (None, {'fields': (
-        'email', 'password', 'first_name', 'middle_name', 'last_name', 'change_email', 'theme', 'timezone',
+        'company', 'email', 'password', 'first_name', 'middle_name', 'last_name', 'change_email', 'timezone',
         'verified')}),
         ('Permissions', {'fields': ('is_active', 'is_staff')}),
     )
@@ -34,7 +34,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': (
-            'company', 'email', 'first_name', 'middle_name', 'last_name', 'theme', 'timezone',
+            'company', 'email', 'first_name', 'middle_name', 'last_name', 'timezone',
             'verified', 'password1', 'password2', 'is_staff', 'is_active')}
          ),
     )
@@ -62,6 +62,14 @@ class CompanyAdmin(admin.ModelAdmin):
         )
 
 
+class CompanyConnectionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'company', 'user', 'role', 'updated_date')
+    list_filter = (CompanyFilter, UserFilter, 'role', 'updated_date')
+    search_fields = ('id',)
+    ordering = ('company', 'user')
+
+
 admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Company, CompanyAdmin)
+admin.site.register(CompanyConnection, CompanyConnectionAdmin)
 admin.site.unregister(Group)
