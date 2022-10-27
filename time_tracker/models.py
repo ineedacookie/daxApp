@@ -39,17 +39,22 @@ class InOutAction(models.Model):
     def save(self, *args, **kwargs):
         """Overridden to allow for calling update current time action after a time action is edited or created"""
         # set action_lookup_datetime when necessary
+        if 'skip' in kwargs:
+            skip = kwargs.pop('skip')
+        else:
+            skip = False
         super(InOutAction, self).save(*args, **kwargs)
-        if self.end:
-            self.action_lookup_datetime = self.end
-        else:
-            self.action_lookup_datetime = self.start
-        if self.end and self.start:
-            self.total_time = self.end.timestamp() - self.start.timestamp()
-        else:
-            self.total_time = 0
-        self.date = self.start.date()
-        self.save()
+        if not skip:
+            if self.end:
+                self.action_lookup_datetime = self.end
+            else:
+                self.action_lookup_datetime = self.start
+            if self.end and self.start:
+                self.total_time = self.end.timestamp() - self.start.timestamp()
+            else:
+                self.total_time = 0
+            self.date = self.start.date()
+            self.save(skip=True)
         self.update_current_time_action()
 
     def delete(self, *args, **kwargs):
@@ -61,11 +66,15 @@ class InOutAction(models.Model):
         """Updates the current time action attached to the specific user"""
         if self.user:
             current_action = \
-                InOutAction.objects.filter(user=self.user).filter(
+                InOutAction.objects.filter(user=self.user).filter(type=self.type).filter(
                     action_lookup_datetime__lt=timezone.now()).order_by(
                     '-action_lookup_datetime')[0]
             user_info = TTUserInfo.objects.filter(user=self.user)[0]
-            user_info.time_action = current_action
+            if self.type == 't':
+                user_info.time_action = current_action
+            elif self.type == 'b':
+                user_info.break_action = current_action
+            user_info.update_status()
             user_info.save()
 
 
@@ -100,9 +109,15 @@ class TTCompanyInfo(models.Model):
 
 class TTUserInfo(models.Model):
     user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=False, blank=False)
-    time_action = models.ForeignKey(InOutAction, on_delete=models.SET_NULL, default=None,
+    time_action = models.ForeignKey(InOutAction, related_name='+', on_delete=models.SET_NULL, default=None,
                                     null=True,
                                     blank=True)
+    break_action = models.ForeignKey(InOutAction, related_name='+', on_delete=models.SET_NULL, default=None,
+                                    null=True,
+                                    blank=True)
+    status_text = models.CharField(max_length=1, default="n", choices=(
+    ('i', 'Clocked In'), ('o', 'Clocked Out'), ('b', 'On Break'), ('c', 'Back From Break'), ('n', 'Welcome to DaxApp')), null=True, blank=True)
+    status_time = models.DateTimeField(blank=True, null=True)
     use_company_default_overtime_settings = models.BooleanField(default=True, null=True, blank=True)
     weekly_overtime = models.BooleanField(default=None, null=True, blank=True)
     weekly_overtime_value = models.IntegerField(default=None,
@@ -124,11 +139,38 @@ class TTUserInfo(models.Model):
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        tt_company = TTCompanyInfo.objects.filter(company=self.user.company)
-        if tt_company:
-            tt_company = tt_company[0]
-            for i in ['weekly_overtime', 'weekly_overtime_value', 'daily_overtime', 'daily_overtime_value', 'double_time', 'double_time_value',
-                      'enable_breaks', 'breaks_are_paid', 'include_breaks_in_overtime_calculation']:
-                if getattr(self, i) is None:
-                    setattr(self, i, getattr(tt_company, 'default_' + i))
+        created = not self.pk
+        if created:
+            tt_company = TTCompanyInfo.objects.filter(company=self.user.company)
+            if tt_company:
+                tt_company = tt_company[0]
+                for i in ['weekly_overtime', 'weekly_overtime_value', 'daily_overtime', 'daily_overtime_value', 'double_time', 'double_time_value',
+                          'enable_breaks', 'breaks_are_paid', 'include_breaks_in_overtime_calculation']:
+                    if getattr(self, i) is None:
+                        setattr(self, i, getattr(tt_company, 'default_' + i))
         super().save(*args, **kwargs)
+
+    def update_status(self):
+        if self.time_action and self.break_action:
+            if self.time_action.end:
+                self.status_text = 'o'
+                self.status_time = self.time_action.end
+            elif self.break_action.end and self.break_action.end > self.time_action.start:
+                self.status_text = 'c'
+                self.status_time = self.break_action.end
+            elif self.break_action.start and self.break_action.start > self.time_action.start:
+                self.status_text = 'b'
+                self.status_time = self.break_action.start
+            else:
+                self.status_text = 'i'
+                self.status_time = self.time_action.start
+        elif self.time_action:
+            if self.time_action.end:
+                self.status_text = 'o'
+                self.status_time = self.time_action.end
+            else:
+                self.status_text = 'i'
+                self.status_time = self.time_action.start
+        else:
+            self.status_text = 'n'
+            self.status_time = None

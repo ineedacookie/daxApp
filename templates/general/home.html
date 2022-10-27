@@ -2,5 +2,7 @@
 {% load static %}
 {% block title %}DaxApp | Home{% endblock %}
 {% block content %}
-  <div>EMPTY</div>
+<div class="row g-3 mb-3">
+  {% include "time_tracker/widgets/simple_clock_in.html" %}
+  </div>
 {% endblock %}

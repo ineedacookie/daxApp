@@ -12,6 +12,7 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
 from .forms import CompanyForm, UserForm, OverriddenPasswordChangeForm, OverriddenAdminPasswordChangeForm, RegisterUserForm
+from time_tracker.forms import SimpleClockForm
 from .models import CustomUser
 from .tokens import account_activation_token
 from django.template.loader import render_to_string
@@ -19,6 +20,8 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
 from .utils import urlsafe_base64_encode, check_employee_form
+
+from time_tracker.models import TTUserInfo
 
 logger = logging.getLogger("django.request")
 
@@ -35,14 +38,15 @@ def home(request):
     """check that the user is logged in. if not send them to the log in page."""
     # if not request.user.password:
     #     return create_account(request)
-
-    page = 'general/home.html'
-    page_arguments = {}
-
     """Checks whether the user is part of the staff or a customer"""
     if request.user.is_staff:
         return redirect('/io_admin')
     else:
+        user_info = TTUserInfo.objects.filter(user=request.user)[0]
+        page = 'general/home.html'
+        page_arguments = {
+            'user_info': user_info
+        }
         return render(request, page, page_arguments)  # fill the {} with arguments
 
 
@@ -67,13 +71,14 @@ def register_account(request):
                 'token': account_activation_token.make_token(register_user),
             })
             to_email = form.cleaned_data.get('email')
-            send_mail(
-                mail_subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [to_email],
-                fail_silently=False,
-            )
+            print('http://127.0.0.1:8000/activate/' + urlsafe_base64_encode(force_bytes(register_user.pk)) + '/' + account_activation_token.make_token(register_user))
+            # send_mail(
+            #     mail_subject,
+            #     message,
+            #     settings.DEFAULT_FROM_EMAIL,
+            #     [to_email],
+            #     fail_silently=False,
+            # )
             page = 'registration/account_created.html'
             page_arguments = {}
         else:

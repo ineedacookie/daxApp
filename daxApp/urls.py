@@ -39,5 +39,10 @@ urlpatterns += [
     path('', include('feedback.urls'))
 ]
 
+# Add time_tracker module
+urlpatterns += [
+    path('', include('time_tracker.urls'))
+]
+
 handler404 = 'users.views.handler404'
 handler500 = 'users.views.handler500'
