@@ -1,20 +1,5 @@
 <div class="col-lg-4">
     <script type="text/javascript">
-    function submit_clock_action(action){
-        $.ajax({
-            type:'POST',
-            url:'{% url 'simple_clock' %}',
-            data:
-            {
-                action: action,
-                comment: $("#simple_clock_comment").val(),
-                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
-            },
-            success:function(response){
-                $("#simple_clock_widget").html($(response).find("#simple_clock_widget").html());
-                }
-            })
-    }
     </script>
     <div class="card h-100 mb-3" id="simple_clock_widget">
         {% csrf_token %}
@@ -30,22 +15,22 @@
                 </div>
                 <div class="col-sm-6 col-lg-12">
                     {% if user_info.status_text == "o" or user_info.status_text == "n" %}
-                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_clock_action('in')"
+                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'in'}], '#simple_clock_widget')"
                             name="clock_in">
                         Clock In
                     </button>
                     {% elif user_info.status_text == "i" or user_info.status_text == "c" %}
-                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_clock_action('out')"
+                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'out'}], '#simple_clock_widget')"
                             name="clock_out">Clock Out
                     </button>
                     {% endif %}
                     {% if user_info.enable_breaks %}
                     {% if user_info.status_text == "i" or user_info.status_text == "c" %}
-                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_clock_action('b_in')"
+                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_in'}], '#simple_clock_widget')"
                             name="start_break">Start Break
                     </button>
                     {% elif user_info.status_text == "b" %}
-                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_clock_action('b_out')"
+                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_out'}], '#simple_clock_widget')"
                             name="end_break">End Break
                     </button>
                     {% endif %}

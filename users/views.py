@@ -7,19 +7,21 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponse
+from django.utils.timezone import activate
 from django.shortcuts import render, redirect
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
 from .forms import CompanyForm, UserForm, OverriddenPasswordChangeForm, OverriddenAdminPasswordChangeForm, RegisterUserForm
 from time_tracker.forms import SimpleClockForm
-from .models import CustomUser
+from .models import CustomUser, Company
 from .tokens import account_activation_token
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
 from .utils import urlsafe_base64_encode, check_employee_form
+from pytz import timezone
 
 from time_tracker.models import TTUserInfo
 
@@ -43,6 +45,17 @@ def home(request):
         return redirect('/io_admin')
     else:
         user_info = TTUserInfo.objects.filter(user=request.user)[0]
+        company = request.user.company
+        used_timezone = request.user.timezone
+        if company:
+            if company.timezone and company.use_company_timezone:
+                used_timezone = company.timezone
+            elif not used_timezone:
+                used_timezone = company.timezone
+
+        if used_timezone:
+            activate(timezone(used_timezone))
+
         page = 'general/home.html'
         page_arguments = {
             'user_info': user_info

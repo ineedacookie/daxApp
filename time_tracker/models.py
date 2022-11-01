@@ -26,8 +26,6 @@ class InOutAction(models.Model):
     end_lon = models.DecimalField(max_digits=22, decimal_places=16, blank=True, null=True)
     end_lat = models.DecimalField(max_digits=22, decimal_places=16, blank=True, null=True)
     comment = models.TextField(blank=True, null=True, default='')
-    date = models.DateField(_("Date"), blank=True, null=True,
-                            default=timezone.now)  # the date that this action should be applied to.
     action_lookup_datetime = models.DateTimeField(blank=True,
                                                   null=True)  # if no end is set then it is the start datetime, otherwise it is the end datetime. For calculating the users current action.
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)
@@ -53,7 +51,6 @@ class InOutAction(models.Model):
                 self.total_time = self.end.timestamp() - self.start.timestamp()
             else:
                 self.total_time = 0
-            self.date = self.start.date()
             self.save(skip=True)
         self.update_current_time_action()
 
