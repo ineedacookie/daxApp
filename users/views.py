@@ -22,6 +22,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .utils import urlsafe_base64_encode, check_employee_form
 from pytz import timezone
+from daxApp.central_data import get_main_page_data
 
 from time_tracker.models import TTUserInfo
 
@@ -44,7 +45,6 @@ def home(request):
     if request.user.is_staff:
         return redirect('/io_admin')
     else:
-        user_info = TTUserInfo.objects.filter(user=request.user)[0]
         company = request.user.company
         used_timezone = request.user.timezone
         if company:
@@ -57,9 +57,7 @@ def home(request):
             activate(timezone(used_timezone))
 
         page = 'general/home.html'
-        page_arguments = {
-            'user_info': user_info
-        }
+        page_arguments = get_main_page_data(request.user)
         return render(request, page, page_arguments)  # fill the {} with arguments
 
 
@@ -100,6 +98,36 @@ def register_account(request):
     if not form:
         page_arguments['form'] = RegisterUserForm()
     return render(request, page, page_arguments)
+
+
+@login_required
+def company_settings(request):
+    """Checks whether the user is a timeclick employee, an employee, or an admin"""
+    if request.user.is_staff:
+        return redirect('/io_admin')
+    else:
+        company = request.user.company
+        used_timezone = request.user.timezone
+        if company:
+            if company.timezone and company.use_company_timezone:
+                used_timezone = company.timezone
+            elif not used_timezone:
+                used_timezone = company.timezone
+
+        if used_timezone:
+            activate(timezone(used_timezone))
+
+        page = 'settings/company_settings.html'
+        page_arguments = get_main_page_data(request.user)
+        if request.method == 'POST':
+            form = CompanyForm(request.user.company, request.POST)
+            if form.is_valid():
+                form.save()
+        else:
+            form = CompanyForm(instance=request.user.company)
+        page_arguments['company_form'] = form
+        return render(request, page, page_arguments)
+
 #
 #
 # @login_required

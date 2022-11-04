@@ -43,6 +43,10 @@ class CompanyForm(ModelForm):
         model = Company
         fields = ('name', 'timezone', 'use_company_timezone')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['timezone'].widget.attrs['class'] = 'form-select'
+
 
 class UserForm(ModelForm):
     class Meta:

@@ -4,8 +4,8 @@
     <div class="card h-100 mb-3" id="simple_clock_widget">
         {% csrf_token %}
         <div class="card-header bg-light d-flex flex-between-center py-2">
-            <h6 class="mb-0">{{ user_info.get_status_text_display }}</h6>
-            <h6 class="mb-0">{{ user_info.status_time }}</h6>
+            <h6 class="mb-0">{{ tt_user_info.get_status_text_display }}</h6>
+            <h6 class="mb-0">{{ tt_user_info.status_time }}</h6>
         </div>
         <div class="card-body">
             <div class="row g-3 h-100">
@@ -14,22 +14,22 @@
                               id="simple_clock_comment"></textarea>
                 </div>
                 <div class="col-sm-6 col-lg-12">
-                    {% if user_info.status_text == "o" or user_info.status_text == "n" %}
+                    {% if tt_user_info.status_text == "o" or tt_user_info.status_text == "n" %}
                     <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'in'}], '#simple_clock_widget')"
                             name="clock_in">
                         Clock In
                     </button>
-                    {% elif user_info.status_text == "i" or user_info.status_text == "c" %}
+                    {% elif tt_user_info.status_text == "i" or tt_user_info.status_text == "c" %}
                     <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'out'}], '#simple_clock_widget')"
                             name="clock_out">Clock Out
                     </button>
                     {% endif %}
-                    {% if user_info.enable_breaks %}
-                    {% if user_info.status_text == "i" or user_info.status_text == "c" %}
+                    {% if tt_user_info.enable_breaks %}
+                    {% if tt_user_info.status_text == "i" or tt_user_info.status_text == "c" %}
                     <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_in'}], '#simple_clock_widget')"
                             name="start_break">Start Break
                     </button>
-                    {% elif user_info.status_text == "b" %}
+                    {% elif tt_user_info.status_text == "b" %}
                     <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_out'}], '#simple_clock_widget')"
                             name="end_break">End Break
                     </button>

@@ -1,0 +1,47 @@
+{% extends "general/nav_template.html" %}
+{% load static %}
+{% block title %}DaxApp | Company{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+    {{ company_form }}
+    <form method="post">
+        {% csrf_token %}
+        {{ company_form }}
+        <div class="mb-3 row">
+            <label for="id_name" class="form-control">Company Name:</label>
+            <input class="form-control" autocomplete="company-name" type="text" name="name" maxlength="255" required="" id="id_name" placeholder="Company Name" value="{{ company_form.name.value|default_if_none:'' }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="customDatalist">Choose your browser from the list:</label>
+          <input class="form-control form-control-sm" id="customDatalist" list="browsers" name="browser" />
+          <datalist id="browsers">
+            <option value="Edge"> </option>
+            <option value="Firefox"> </option>
+            <option value="Chrome"> </option>
+            <option value="Opera"> </option>
+            <option value="Safari"></option>
+          </datalist>
+        </div>
+        <div class="input-group mb-3">
+          <div class="input-group-text">
+            <input class="form-check-input" type="checkbox" value="" aria-label="Checkbox for following text input" />
+          </div>
+        </div>
+        <div class="mb-3">
+            <input class="form-control" autocomplete="last-name" type="text" name="last_name" maxlength="100" required="" id="id_last_name" placeholder="Last name">
+        </div>
+        <div class="mb-3">
+            <input class="form-control" autocomplete="email" type="email" name="email" maxlength="254" required="" id="id_email" placeholder="Email address">
+        </div>
+        <div class="mb-3">
+                <input class="form-check-input" type="checkbox" name="agree_to_terms_and_conditions" required="" id="id_agree_to_terms_and_conditions">
+                <label class="form-label" for="id_agree_to_terms_and_conditions">I accept the <a href="#!">terms </a>and <a
+                        href="#!">privacy
+                    policy</a></label>
+        </div>
+        <div class="mb-3">
+            <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
