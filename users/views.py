@@ -106,6 +106,15 @@ def company_settings(request):
     if request.user.is_staff:
         return redirect('/io_admin')
     else:
+        page = 'settings/company_settings.html'
+        page_arguments = get_main_page_data(request.user)
+        if request.method == 'POST':
+            form = CompanyForm(request.POST, instance=request.user.company)
+            if form.is_valid():
+                form.save()
+        else:
+            form = CompanyForm(instance=request.user.company)
+
         company = request.user.company
         used_timezone = request.user.timezone
         if company:
@@ -117,14 +126,6 @@ def company_settings(request):
         if used_timezone:
             activate(timezone(used_timezone))
 
-        page = 'settings/company_settings.html'
-        page_arguments = get_main_page_data(request.user)
-        if request.method == 'POST':
-            form = CompanyForm(request.user.company, request.POST)
-            if form.is_valid():
-                form.save()
-        else:
-            form = CompanyForm(instance=request.user.company)
         page_arguments['company_form'] = form
         return render(request, page, page_arguments)
 

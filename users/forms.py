@@ -46,6 +46,7 @@ class CompanyForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['timezone'].widget.attrs['class'] = 'form-select'
+        self.fields['use_company_timezone'].widget.attrs['class'] = 'form-check-input'
 
 
 class UserForm(ModelForm):

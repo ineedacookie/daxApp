@@ -12,8 +12,8 @@ from .managers import CustomUserManager
 class Company(models.Model):
     name = models.CharField(max_length=255, help_text="Company Name", blank=True, null=True)
     timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
-    use_company_timezone = models.BooleanField(default=False, blank=True, null=True)
-    paying = models.BooleanField(default=False, blank=True, null=True)
+    use_company_timezone = models.BooleanField(default=False, blank=True)
+    paying = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
@@ -38,7 +38,7 @@ class CustomUser(AbstractUser):
     middle_name = models.CharField(_('Middle Name'), max_length=50, blank=True, null=True)
     last_name = models.CharField(_('Last Name'), max_length=100, blank=False, null=True)
     timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, blank=True, use_pytz=True)
-    verified = models.BooleanField(default=False, blank=True, null=True)
+    verified = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
