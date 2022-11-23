@@ -22,54 +22,10 @@
             <div class="navbar-vertical-content scrollbar">
               <ul class="navbar-nav flex-column mb-3" id="navbarVerticalNav">
                 <li class="nav-item">
-                  <!-- parent pages--><a class="nav-link dropdown-indicator" href="#dashboard" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="dashboard">
+                  <a class="nav-link" onclick="return load_main_content('{% url 'home' %}', '#main_content');" href="{% url 'home' %}">
                     <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="fas fa-chart-pie"></span></span><span class="nav-link-text ps-1">Dashboard</span>
                     </div>
                   </a>
-                  <ul class="nav collapse" id="dashboard">
-                    <li class="nav-item"><a class="nav-link" href="../index.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Default</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/analytics.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Analytics</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/crm.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">CRM</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/e-commerce.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">E commerce</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/lms.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">LMS</span><span class="badge rounded-pill ms-2 badge-soft-success">New</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/project-management.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Management</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="../dashboard/saas.html">
-                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">SaaS</span>
-                        </div>
-                      </a>
-                      <!-- more inner pages-->
-                    </li>
-                  </ul>
                 </li>
               </ul>
             </div>
@@ -404,7 +360,9 @@
                     <a class="dropdown-item fw-bold text-warning" href="#!"><span class="fas fa-crown me-1"></span><span>Go Pro</span></a>
 
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#!">Set status</a>
+                    {% if company_connection.role == "c" %}
+                    <a class="dropdown-item" onclick="return load_main_content('{% url 'company_settings' %}', '#main_content');" href="{% url 'company_settings' %}">Company Settings</a>
+                    {% endif %}
                     <a class="dropdown-item" href="../pages/user/profile.html">Profile &amp; account</a>
                     <a class="dropdown-item" href="#!">Feedback</a>
 
@@ -416,6 +374,8 @@
               </li>
             </ul>
           </nav>
-          {% block content %}{% endblock %}
+          <div id="main_content">
+            {% block content %}{% endblock %}
+          </div>
         </div>
 {% endblock %}

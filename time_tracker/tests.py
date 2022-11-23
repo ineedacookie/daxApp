@@ -45,7 +45,6 @@ class ModelsTest(TestCase):
 
         clock_in = InOutAction.objects.create(type='t', user=user)
         self.assertEqual(clock_in.action_lookup_datetime, clock_in.start)
-        self.assertTrue(clock_in.date)
         self.assertEqual(clock_in.total_time, 0)
 
         user_info = TTUserInfo.objects.filter(user=user)[0]
@@ -63,7 +62,6 @@ class ModelsTest(TestCase):
 
         break_in = InOutAction.objects.create(type='b', user=user)
         self.assertEqual(break_in.action_lookup_datetime, break_in.start)
-        self.assertTrue(break_in.date)
         self.assertEqual(break_in.total_time, 0)
 
         user_info = TTUserInfo.objects.filter(user=user)[0]

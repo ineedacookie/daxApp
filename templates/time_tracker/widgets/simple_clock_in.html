@@ -1,17 +1,18 @@
+{% load tz %}
 <div class="col-lg-4">
     <script type="text/javascript">
     </script>
     <div class="card h-100 mb-3" id="simple_clock_widget">
         {% csrf_token %}
         <div class="card-header bg-light d-flex flex-between-center py-2">
-            <h6 class="mb-0">{{ tt_user_info.get_status_text_display }}</h6>
-            <h6 class="mb-0">{{ tt_user_info.status_time }}</h6>
+            <h5 class="mb-0">{{ tt_user_info.get_status_text_display }}</h5>
+            <h5 class="mb-0">{{ tt_user_info.status_time|localtime}}</h5>
         </div>
         <div class="card-body">
             <div class="row g-3 h-100">
                 <div class="col-sm-6 col-lg-12">
                     <textarea class="form-control" name="comment" cols="40" rows="3"
-                              id="simple_clock_comment"></textarea>
+                              id="simple_clock_comment" placeholder="Comment"></textarea>
                 </div>
                 <div class="col-sm-6 col-lg-12">
                     {% if tt_user_info.status_text == "o" or tt_user_info.status_text == "n" %}
@@ -30,7 +31,7 @@
                             name="start_break">Start Break
                     </button>
                     {% elif tt_user_info.status_text == "b" %}
-                    <button class="btn btn-primary d-block w-100 mt-3" onclick="submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_out'}], '#simple_clock_widget')"
+                    <button class="btn btn-primary d-block w-100 mt-3" onclick="return submit_update_widget('{% url 'simple_clock' %}', [{name:'action', value:'b_out'}], '#simple_clock_widget');"
                             name="end_break">End Break
                     </button>
                     {% endif %}

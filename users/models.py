@@ -11,7 +11,7 @@ from .managers import CustomUserManager
 
 class Company(models.Model):
     name = models.CharField(max_length=255, help_text="Company Name", blank=True, null=True)
-    timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, use_pytz=True)
+    timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True)
     use_company_timezone = models.BooleanField(default=False, blank=True)
     paying = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)

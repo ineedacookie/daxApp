@@ -46,7 +46,7 @@ def simple_clock(request):
     user_info = TTUserInfo.objects.filter(user=request.user)[0]
     page = 'time_tracker/widgets/simple_clock_in.html'
     page_arguments = {
-        'user_info': user_info
+        'tt_user_info': user_info
     }
 
     return render(request, page, page_arguments)

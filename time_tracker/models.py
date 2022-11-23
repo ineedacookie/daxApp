@@ -52,7 +52,7 @@ class InOutAction(models.Model):
             else:
                 self.total_time = 0
             self.save(skip=True)
-        self.update_current_time_action()
+            self.update_current_time_action()
 
     def delete(self, *args, **kwargs):
         """Overridden to allow for calling update current time action after deletion"""
@@ -64,7 +64,7 @@ class InOutAction(models.Model):
         if self.user:
             current_action = \
                 InOutAction.objects.filter(user=self.user).filter(type=self.type).filter(
-                    action_lookup_datetime__lt=timezone.now()).order_by(
+                    action_lookup_datetime__lte=timezone.now()).order_by(
                     '-action_lookup_datetime')[0]
             user_info = TTUserInfo.objects.filter(user=self.user)[0]
             if self.type == 't':

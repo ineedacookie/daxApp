@@ -7,7 +7,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponse
-from django.utils.timezone import activate
 from django.shortcuts import render, redirect
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -45,17 +44,6 @@ def home(request):
     if request.user.is_staff:
         return redirect('/io_admin')
     else:
-        company = request.user.company
-        used_timezone = request.user.timezone
-        if company:
-            if company.timezone and company.use_company_timezone:
-                used_timezone = company.timezone
-            elif not used_timezone:
-                used_timezone = company.timezone
-
-        if used_timezone:
-            activate(timezone(used_timezone))
-
         page = 'general/home.html'
         page_arguments = get_main_page_data(request.user)
         return render(request, page, page_arguments)  # fill the {} with arguments
@@ -114,17 +102,6 @@ def company_settings(request):
                 form.save()
         else:
             form = CompanyForm(instance=request.user.company)
-
-        company = request.user.company
-        used_timezone = request.user.timezone
-        if company:
-            if company.timezone and company.use_company_timezone:
-                used_timezone = company.timezone
-            elif not used_timezone:
-                used_timezone = company.timezone
-
-        if used_timezone:
-            activate(timezone(used_timezone))
 
         page_arguments['company_form'] = form
         return render(request, page, page_arguments)
@@ -619,7 +596,7 @@ def company_settings(request):
 #     return render(request, page, page_arguments)  # fill the {} with arguments
 #
 #
-def activate(request, uidb64, token):
+def activate_account(request, uidb64, token):
     """This page is for validating an email and getting the initial password set for a user."""
     page = 'registration/activation_link.html'
     page_arguments = {}

@@ -2,23 +2,28 @@
 {% load static %}
 {% block title %}DaxApp | Company{% endblock %}
 {% block content %}
-<div class="row g-3 mb-3">
-    <form method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-            <input class="form-control" autocomplete="company-name" type="text" name="name" maxlength="255" required="" id="id_name" placeholder="Company Name" value="{{ company_form.name.value|default_if_none:'' }}">
-        </div>
-        <div class="mb-3">
-          {{ company_form.timezone }}
-        </div>
-        <div class="mb-3">
-            {{ company_form.use_company_timezone }}
-            <label class="form-label" for="id_use_company_timezone">Use company timezone for all employees?</label>
-        </div>
+<div class="card">
+    <div class="card-body" id="company_settings_card">
+        <h3>Company Settings</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input class="form-control" autocomplete="company-name" type="text" name="name" maxlength="255"
+                       required="" id="id_name" placeholder="Company Name"
+                       value="{{ company_form.name.value|default_if_none:'' }}">
+            </div>
+            <div class="mb-3">
+                {{ company_form.timezone }}
+            </div>
+            <div class="mb-3">
+                {{ company_form.use_company_timezone }}
+                <label class="form-label" for="id_use_company_timezone">Use company timezone for all employees?</label>
+            </div>
 
-        <div class="mb-3">
-            <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Save</button>
-        </div>
-    </form>
+            <div class="mb-3">
+                <button class="btn btn-primary d-block w-100 mt-3" onclick="return submit_update_widget('{% url 'company_settings' %}', [{}], '#company_settings_card');" name="save_company_settings">Save</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

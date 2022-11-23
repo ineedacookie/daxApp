@@ -9,4 +9,16 @@ function submit_update_widget(url, additional_data, widget_id){
                 $(widget_id).html($(response).find(widget_id).html());
                 }
             })
+        return false;
+    }
+
+function load_main_content(url, main_id){
+        $.ajax({
+            type:'GET',
+            url:url,
+            success:function(response){
+                $(main_id).html($(response).find(main_id).html());
+                }
+            })
+        return false;
     }
