@@ -12,7 +12,6 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 
 from .forms import CompanyForm, UserForm, OverriddenPasswordChangeForm, OverriddenAdminPasswordChangeForm, RegisterUserForm
-from time_tracker.forms import SimpleClockForm
 from .models import CustomUser, Company
 from .tokens import account_activation_token
 from django.template.loader import render_to_string

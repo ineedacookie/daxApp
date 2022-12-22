@@ -1,0 +1,102 @@
+{% extends "general/nav_template.html" %}
+{% load static %}
+{% block title %}DaxApp | Times{% endblock %}
+{% block content %}
+<div class="card overflow-hidden">
+    <div class="card-header">
+        <div class="row gx-0 align-items-center">
+            <div class="col-auto d-flex justify-content-end order-md-1">
+                <button class="btn icon-item icon-item-sm shadow-none p-0 me-1 ms-md-2" data-bs-toggle="tooltip" data-event="prev"
+                        title="Previous" type="button"><span class="fas fa-arrow-left"></span></button>
+                <button class="btn icon-item icon-item-sm shadow-none p-0 me-1 me-lg-2" data-bs-toggle="tooltip" data-event="next"
+                        title="Next" type="button"><span class="fas fa-arrow-right"></span></button>
+            </div>
+            <div class="col-auto col-md-auto order-md-2">
+                <h4 class="mb-0 fs-0 fs-sm-1 fs-lg-2 calendar-title"></h4>
+            </div>
+            <div class="col col-md-auto d-flex justify-content-end order-md-3">
+                <button class="btn btn-falcon-primary btn-sm" data-event="today" type="button">Today</button>
+            </div>
+            <div class="col-md-auto d-md-none">
+                <hr/>
+            </div>
+            <div class="col-auto d-flex order-md-0">
+                <button class="btn btn-primary btn-sm" data-bs-target="#addEventModal" data-bs-toggle="modal"
+                        type="button"><span class="fas fa-plus me-2"></span>Add Schedule
+                </button>
+            </div>
+            <div class="col d-flex justify-content-end order-md-2">
+                <div class="dropdown font-sans-serif me-md-2">
+                    <button aria-expanded="false"
+                            aria-haspopup="true" class="btn btn-falcon-default text-600 btn-sm dropdown-toggle dropdown-caret-none" data-boundary="viewport" data-bs-toggle="dropdown"
+                            id="email-filter" type="button"><span data-view-title="data-view-title">Month View</span><span
+                            class="fas fa-sort ms-2 fs--1"></span></button>
+                    <div aria-labelledby="email-filter" class="dropdown-menu dropdown-menu-end border py-2"><a
+                            class="active dropdown-item d-flex justify-content-between" data-fc-view="dayGridMonth"
+                            href="#!">Month View<span class="icon-check"><span class="fas fa-check"
+                                                                                                 data-fa-transform="down-4 shrink-4"></span></span></a><a
+                            class="dropdown-item d-flex justify-content-between" data-fc-view="timeGridWeek" href="#!">Week
+                        View<span class="icon-check"><span class="fas fa-check"
+                                                           data-fa-transform="down-4 shrink-4"></span></span></a><a
+                            class="dropdown-item d-flex justify-content-between" data-fc-view="timeGridDay" href="#!">Day
+                        View<span class="icon-check"><span class="fas fa-check"
+                                                           data-fa-transform="down-4 shrink-4"></span></span></a><a
+                            class="dropdown-item d-flex justify-content-between" data-fc-view="listWeek" href="#!">List
+                        View<span class="icon-check"><span class="fas fa-check"
+                                                           data-fa-transform="down-4 shrink-4"></span></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0 scrollbar">
+        <div class="calendar-outline" data="{{ events }}" id="appCalendar"></div>
+    </div>
+</div>
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border"></div>
+    </div>
+</div>
+<div class="modal fade" id="addEventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border">
+            <form autocomplete="off" id="addEventForm" url="{% url 'manage_time_event' %}">
+                {% csrf_token %}
+                <div class="modal-header px-card bg-light border-bottom-0">
+                    <h5 class="modal-title">Add Action</h5>
+                    <button aria-label="Close" class="btn-close me-n1" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body p-card">
+                    <div class="mb-3">
+                        <label class="fs-0" for="eventTitle">Title</label>
+                        <select class="form-select js-choice" id="eventTitle" size="1" name="title" required="required" data-options='{"removeItemButton":true}'>
+                          <option>Clocked In</option>
+                          <option>Break</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control datetimepicker" data-options='{"allowInput":"true", "static":"true","enableTime":"true","dateFormat":"G:iK  M d, Y"}' id="eventStartDate" name="startDate"
+                               placeholder="Start" required="required"
+                               type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control datetimepicker" data-options='{"allowInput":"true", "static":"true","enableTime":"true","dateFormat":"G:iK  M d, Y"}' id="eventEndDate" name="endDate"
+                               placeholder="End"
+                               type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fs-0" for="eventDescription">Comment</label>
+                        <textarea class="form-control" id="eventDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
+                    <button class="btn btn-primary px-4" type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block beforeThemeScript %}
+{% endblock %}

@@ -4750,7 +4750,7 @@ var events = [{
   className: 'bg-soft-primary'
 }];
 /*-----------------------------------------------
-|   Calendar
+|   Manage Times Calendar
 -----------------------------------------------*/
 
 var appCalendarInit = function appCalendarInit() {
@@ -4799,6 +4799,11 @@ var appCalendarInit = function appCalendarInit() {
       dayMaxEvents: 2,
       height: 800,
       stickyHeaderDates: false,
+      displayEventEnd: {
+        'month': true,
+        'basicWeek': true,
+        'default': true
+      },
       views: {
         week: {
           eventLimit: 3
@@ -4810,7 +4815,7 @@ var appCalendarInit = function appCalendarInit() {
         omitZeroMinute: true,
         meridiem: true
       },
-      events: eventList,
+      events: JSON.parse(appCalendar.getAttribute('data')),
       eventClick: function eventClick(info) {
         if (info.event.url) {
           window.open(info.event.url, '_blank');
@@ -4876,20 +4881,39 @@ var appCalendarInit = function appCalendarInit() {
     addEventForm && addEventForm.addEventListener(Events.SUBMIT, function (e) {
       e.preventDefault();
       var _e$target = e.target,
+          csrfmiddlewaretoken = _e$target.csrfmiddlewaretoken,
           title = _e$target.title,
           startDate = _e$target.startDate,
           endDate = _e$target.endDate,
-          label = _e$target.label,
-          description = _e$target.description,
-          allDay = _e$target.allDay;
-      calendar.addEvent({
+          description = _e$target.description;
+      let end = endDate.value
+      var temp_data = {
+        csrfmiddlewaretoken: csrfmiddlewaretoken.value,
         title: title.value,
         start: startDate.value,
-        end: endDate.value ? endDate.value : null,
-        allDay: allDay.checked,
-        className: allDay.checked && label.value ? "bg-soft-".concat(label.value) : '',
-        description: description.value
-      });
+        end: endDate.value,
+        description: description.value,
+        event: 'add_time',
+      }
+      $.ajax({
+        type:'POST',
+        url:addEventForm.getAttribute('url'),
+        data: temp_data,
+        success:function(response){
+            delete temp_data['event']
+            delete temp_data['csrfmiddlewaretoken']
+            if(response.action_id){
+                temp_data['id'] = response.action_id
+                if(temp_data.end){
+                    temp_data.end = flatpickr.parseDate(temp_data.end, "G:iK  M d, Y").toISOString()
+                  }
+                temp_data.start = flatpickr.parseDate(temp_data.start, "G:iK  M d, Y").toISOString()
+                calendar.addEvent(temp_data);
+            } else {
+                console.log(response.errors)
+            }
+        }
+      })
       e.target.reset();
       window.bootstrap.Modal.getInstance(addEventModal).hide();
     });

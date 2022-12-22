@@ -12,4 +12,4 @@ class SimpleClockForm(ModelForm):
 
     class Meta:
         model = InOutAction
-        fields = ('type', 'start', 'end', 'comment')
+        fields = ('user', 'type', 'start', 'end', 'comment')

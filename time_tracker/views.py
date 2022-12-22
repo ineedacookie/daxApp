@@ -1,11 +1,12 @@
 import logging
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
-from .forms import SimpleClockForm
 from .models import InOutAction, TTUserInfo
-from .utils import combine_comments
+from .utils import combine_comments, get_events_by_month, add_edit_time
+from daxApp.central_data import get_main_page_data
 
 logger = logging.getLogger("django.request")
 
@@ -50,3 +51,22 @@ def simple_clock(request):
     }
 
     return render(request, page, page_arguments)
+
+
+@login_required
+def manage_times(request):
+    page = 'time_tracker/manage_times.html'
+    page_arguments = get_main_page_data(request.user)
+    page_arguments['events'] = get_events_by_month(user=request.user)
+
+    return render(request, page, page_arguments)
+
+
+@login_required
+def event_handler(request):
+    if request.POST:
+        event = request.POST.get('event', '')
+        if event:
+            if event == 'add_time':
+                errors, action_id = add_edit_time(request.user, request.POST)
+                return JsonResponse(data={'errors': errors, 'action_id': action_id}, status=201, safe=False)

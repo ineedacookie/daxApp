@@ -244,3 +244,5 @@ MESSAGE_TAGS = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ENCRYPT_CODE = b"The Craziest pass3wrd you321 have enver seen"

@@ -17,7 +17,7 @@
         <h5>Register</h5>
     </div>
     <div class="col-auto fs--1 text-600"><span class="mb-0 undefined">Have an account?</span> <span><a
-            href="../../../pages/authentication/simple/login.html">Login</a></span></div>
+            href="{% url 'login'%}">Login</a></span></div>
 </div>
 <form method="post">
     {% csrf_token %}
