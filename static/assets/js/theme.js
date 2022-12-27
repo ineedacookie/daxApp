@@ -4763,11 +4763,14 @@ var appCalendarInit = function appCalendarInit() {
     DATA_CALENDAR_VIEW: '[data-fc-view]',
     DATA_EVENT: '[data-event]',
     DATA_VIEW_TITLE: '[data-view-title]',
-    EVENT_DETAILS_MODAL: '#eventDetailsModal',
-    EVENT_DETAILS_MODAL_CONTENT: '#eventDetailsModal .modal-content',
     EVENT_START_DATE: '#addEventModal [name="startDate"]',
+    EVENT_END_DATE: '#addEventModal [name="endDate"]',
+    EVENT_TITLE: '#addEventModal [name="title"]',
+    EVENT_DESCRIPTION: '#addEventModal [name="description"]',
+    CSRF_INPUT: '[name="csrfmiddlewaretoken"]',
     INPUT_TITLE: '[name="title"]'
   };
+  var Selected_id = null;
   var Events = {
     CLICK: 'click',
     SHOWN_BS_MODAL: 'shown.bs.modal',
@@ -4791,7 +4794,6 @@ var appCalendarInit = function appCalendarInit() {
   var appCalendar = document.querySelector(Selectors.CALENDAR);
   var addEventForm = document.querySelector(Selectors.ADD_EVENT_FORM);
   var addEventModal = document.querySelector(Selectors.ADD_EVENT_MODAL);
-  var eventDetailsModal = document.querySelector(Selectors.EVENT_DETAILS_MODAL);
 
   if (appCalendar) {
     var calendar = renderCalendar(appCalendar, {
@@ -4815,27 +4817,90 @@ var appCalendarInit = function appCalendarInit() {
         omitZeroMinute: true,
         meridiem: true
       },
-      events: JSON.parse(appCalendar.getAttribute('data')),
+      events: {
+            url: '/get_time_actions',
+            method: 'POST',
+            extraParams: {
+              csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value')
+            },
+            failure: function() {
+              alert('There was an error while fetching actions, please refresh in a minute and try again.');
+            }
+          },
       eventClick: function eventClick(info) {
         if (info.event.url) {
           window.open(info.event.url, '_blank');
           info.jsEvent.preventDefault();
         } else {
-          var template = getTemplate(info.event);
-          document.querySelector(Selectors.EVENT_DETAILS_MODAL_CONTENT).innerHTML = template;
-          var modal = new window.bootstrap.Modal(eventDetailsModal);
+          var modal = new window.bootstrap.Modal(addEventModal);
           modal.show();
+
+          //populate the modal
+          addEventModal.querySelector(".modal-title").innerText = "Edit Action"
+          document.querySelector(Selectors.EVENT_START_DATE)._flatpickr.setDate(info.event.start)
+          document.querySelector(Selectors.EVENT_END_DATE)._flatpickr.setDate(info.event.end)
+          document.querySelector(Selectors.EVENT_TITLE).value = info.event.title
+          if(info.event.description){
+            document.querySelector(Selectors.EVENT_DESCRIPTION).innerText = info.event.description
+          } else {
+            document.querySelector(Selectors.EVENT_DESCRIPTION).innerText = ""
+          }
+          Selected_id = info.event.id
+
         }
       },
       dateClick: function dateClick(info) {
         var modal = new window.bootstrap.Modal(addEventModal);
         modal.show();
         /*eslint-disable-next-line*/
+        addEventModal.querySelector(".modal-title").innerText = "Add Action"
+        Selected_id = null
 
         var flatpickr = document.querySelector(Selectors.EVENT_START_DATE)._flatpickr;
 
-        flatpickr.setDate([info.dateStr]);
-      }
+        flatpickr.setDate(flatpickr.parseDate(info.dateStr, "Y-m-d"));
+      },
+      eventResize: function(event){
+        var temp_data = {
+          start: event.event.startStr,
+          end: event.event.endStr,
+          action_id: event.event.id,
+          csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+          event: 'add_edit_time',
+        }
+        $.ajax({
+        type:'POST',
+        url:addEventForm.getAttribute('url'),
+        data: temp_data,
+        success:function(response){
+            if(response.errors){
+                console.log(response.errors)
+            }
+        }
+      })
+      },
+     eventDrop: function(event){
+        var temp_data = {
+          start: event.event.startStr,
+          end: event.event.endStr,
+          action_id: event.event.id,
+          csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+          event: 'add_edit_time',
+        }
+        $.ajax({
+        type:'POST',
+        url:addEventForm.getAttribute('url'),
+        data: temp_data,
+        success:function(response){
+            if(response.errors){
+                console.log(response.errors)
+            }
+        }
+      })
+      },
+     eventRender: function(view, element) {
+        var date = calendar.getDate()
+     },
     });
     updateTitle(calendar.currentData.viewTitle);
     document.querySelectorAll(Selectors.DATA_EVENT).forEach(function (button) {
@@ -4888,21 +4953,28 @@ var appCalendarInit = function appCalendarInit() {
           description = _e$target.description;
       let end = endDate.value
       var temp_data = {
+        action_id: Selected_id,
         csrfmiddlewaretoken: csrfmiddlewaretoken.value,
         title: title.value,
         start: startDate.value,
         end: endDate.value,
         description: description.value,
-        event: 'add_time',
+        event: 'add_edit_time',
       }
       $.ajax({
         type:'POST',
         url:addEventForm.getAttribute('url'),
         data: temp_data,
         success:function(response){
+            let existing_id = temp_data['action_id']
+            delete temp_data['action_id']
             delete temp_data['event']
             delete temp_data['csrfmiddlewaretoken']
             if(response.action_id){
+                if(existing_id){
+                    // remove the id so that we can add the update event back.
+                    calendar.getEventById(existing_id).remove()
+                }
                 temp_data['id'] = response.action_id
                 if(temp_data.end){
                     temp_data.end = flatpickr.parseDate(temp_data.end, "G:iK  M d, Y").toISOString()
@@ -5019,7 +5091,7 @@ var managementCalendarInit = function managementCalendarInit() {
 
           var flatpickr = document.querySelector(Selectors.EVENT_START_DATE)._flatpickr;
 
-          flatpickr.setDate([info.dateStr]);
+          flatpickr.setDate(info.dateStr);
         },
         events: managementEventList
       });

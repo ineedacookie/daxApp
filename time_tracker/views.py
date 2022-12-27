@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from .models import InOutAction, TTUserInfo
-from .utils import combine_comments, get_events_by_month, add_edit_time
+from .utils import combine_comments, get_events_by_range, add_edit_time
 from daxApp.central_data import get_main_page_data
 
 logger = logging.getLogger("django.request")
@@ -57,7 +57,6 @@ def simple_clock(request):
 def manage_times(request):
     page = 'time_tracker/manage_times.html'
     page_arguments = get_main_page_data(request.user)
-    page_arguments['events'] = get_events_by_month(user=request.user)
 
     return render(request, page, page_arguments)
 
@@ -67,6 +66,12 @@ def event_handler(request):
     if request.POST:
         event = request.POST.get('event', '')
         if event:
-            if event == 'add_time':
+            if event == 'add_edit_time':
                 errors, action_id = add_edit_time(request.user, request.POST)
                 return JsonResponse(data={'errors': errors, 'action_id': action_id}, status=201, safe=False)
+
+
+@login_required
+def fetch_actions(request):
+    if request.POST:
+        return JsonResponse(data=get_events_by_range(user=request.user, in_start=request.POST.get('start'), in_end=request.POST.get('end')), status=201, safe=False)

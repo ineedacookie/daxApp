@@ -22,7 +22,7 @@
             </div>
             <div class="col-auto d-flex order-md-0">
                 <button class="btn btn-primary btn-sm" data-bs-target="#addEventModal" data-bs-toggle="modal"
-                        type="button"><span class="fas fa-plus me-2"></span>Add Schedule
+                        type="button"><span class="fas fa-plus me-2"></span>Add Action
                 </button>
             </div>
             <div class="col d-flex justify-content-end order-md-2">
@@ -50,12 +50,7 @@
         </div>
     </div>
     <div class="card-body p-0 scrollbar">
-        <div class="calendar-outline" data="{{ events }}" id="appCalendar"></div>
-    </div>
-</div>
-<div class="modal fade" id="eventDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border"></div>
+        <div class="calendar-outline" id="appCalendar"></div>
     </div>
 </div>
 <div class="modal fade" id="addEventModal" tabindex="-1">
