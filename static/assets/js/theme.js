@@ -4852,9 +4852,8 @@ var appCalendarInit = function appCalendarInit() {
         modal.show();
         /*eslint-disable-next-line*/
         Selected_id = null
-
+2
         var flatpickr = document.querySelector(Selectors.EVENT_START_DATE)._flatpickr;
-        document.querySelector(Selectors.EVENT_END_DATE)._flatpickr.clear();
 
         flatpickr.setDate(flatpickr.parseDate(info.dateStr, "Y-m-d"));
       },
