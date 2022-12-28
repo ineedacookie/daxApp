@@ -6,7 +6,10 @@ from django.utils import timezone
 
 from .models import InOutAction, TTUserInfo
 from .utils import combine_comments, get_events_by_range, add_edit_time
+from users.models import CustomUser
+from daxApp.encryption import decrypt_id
 from daxApp.central_data import get_main_page_data
+from users.utils import get_selectable_employees
 
 logger = logging.getLogger("django.request")
 
@@ -57,6 +60,8 @@ def simple_clock(request):
 def manage_times(request):
     page = 'time_tracker/manage_times.html'
     page_arguments = get_main_page_data(request.user)
+    return_list, _ = get_selectable_employees(request.user)
+    page_arguments['show_select_employee'] = len(return_list) > 1
 
     return render(request, page, page_arguments)
 
@@ -67,11 +72,21 @@ def event_handler(request):
         event = request.POST.get('event', '')
         if event:
             if event == 'add_edit_time':
-                errors, action_id = add_edit_time(request.user, request.POST)
+                # TODO possibly include some sort of check to make sure the user can access the other users information
+                if request.POST.get('employee_id', ''):
+                    user = CustomUser.objects.get(id=decrypt_id(request.POST['employee_id']))
+                else:
+                    user = request.user
+                errors, action_id = add_edit_time(user, request.POST)
                 return JsonResponse(data={'errors': errors, 'action_id': action_id}, status=201, safe=False)
 
 
 @login_required
 def fetch_actions(request):
     if request.POST:
-        return JsonResponse(data=get_events_by_range(user=request.user, in_start=request.POST.get('start'), in_end=request.POST.get('end')), status=201, safe=False)
+        # TODO possibly include some sort of check to make sure the user can access the other users information
+        if request.POST.get('employee_id', ''):
+            user = CustomUser.objects.get(id=decrypt_id(request.POST['employee_id']))
+        else:
+            user = request.user
+        return JsonResponse(data=get_events_by_range(user, in_start=request.POST.get('start'), in_end=request.POST.get('end')), status=201, safe=False)

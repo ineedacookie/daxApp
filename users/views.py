@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
-from .utils import urlsafe_base64_encode, check_employee_form
+from .utils import urlsafe_base64_encode, check_employee_form, get_selectable_employees
 from pytz import timezone
 from daxApp.central_data import get_main_page_data
 
@@ -104,6 +104,31 @@ def company_settings(request):
 
         page_arguments['company_form'] = form
         return render(request, page, page_arguments)
+
+
+@login_required
+def selectable_employees(request):
+    """
+    Returns a list of selectable employees depending on who the user is and what their permissions are.
+    """
+    return_list = []
+    more = False
+    if request.GET:
+        query = request.GET.get('q', '')
+        page = request.GET.get('page', 1)
+        if query:
+            query = query.upper()
+        user = request.user
+        # TODO flesh this out so permissions are more exclusive
+        return_list, more = get_selectable_employees(user, page, query)
+
+    return JsonResponse({
+        'results': return_list,
+        'pagination': {
+            'more': more
+        }
+    })
+
 
 #
 #

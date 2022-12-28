@@ -4,6 +4,34 @@
 {% block content %}
 <div class="card overflow-hidden">
     <div class="card-header">
+        {% if show_select_employee %}
+        <div class="row mb-3">
+            <div class="form-group" style="max-width: 400px">
+                <label for="employee_selector">Select an Employee</label>
+              <select class="form-select" id="employee_selector">
+              </select>
+            </div>
+            <script>
+                $('#employee_selector').select2({
+                  ajax: {
+                    delay: 250,
+                    url: '{% url "selectable_employees" %}',
+                    cache: true,
+                  },
+                });
+                $('#employee_selector').on("change", function() {
+                    selected_emp = this.options[this.selectedIndex].value;
+                    appCalendarInit();
+                });
+            </script>
+        </div>
+        {% else %}
+            <script>
+                $(document).ready(function(){
+                    appCalendarInit();
+                });
+            </script>
+        {% endif %}
         <div class="row gx-0 align-items-center">
             <div class="col-auto d-flex justify-content-end order-md-1">
                 <button class="btn icon-item icon-item-sm shadow-none p-0 me-1 ms-md-2" data-bs-toggle="tooltip" data-event="prev"
@@ -92,6 +120,15 @@
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function(){
+        $('#addEventModal').on('hidden.bs.modal', function(){
+            form = document.getElementById('addEventForm');
+            form.reset();
+            form.getElementsByClassName('modal-title')[0].innerText = "Add Action";
+        });
+    });
+</script>
 {% endblock %}
 {% block beforeThemeScript %}
 {% endblock %}

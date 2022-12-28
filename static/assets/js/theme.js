@@ -4753,6 +4753,8 @@ var events = [{
 |   Manage Times Calendar
 -----------------------------------------------*/
 
+var selected_emp = ''
+
 var appCalendarInit = function appCalendarInit() {
   var Selectors = {
     ACTIVE: '.active',
@@ -4806,11 +4808,6 @@ var appCalendarInit = function appCalendarInit() {
         'basicWeek': true,
         'default': true
       },
-      views: {
-        week: {
-          eventLimit: 3
-        }
-      },
       eventTimeFormat: {
         hour: 'numeric',
         minute: '2-digit',
@@ -4821,7 +4818,8 @@ var appCalendarInit = function appCalendarInit() {
             url: '/get_time_actions',
             method: 'POST',
             extraParams: {
-              csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value')
+              csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+              employee_id: selected_emp,
             },
             failure: function() {
               alert('There was an error while fetching actions, please refresh in a minute and try again.');
@@ -4853,10 +4851,10 @@ var appCalendarInit = function appCalendarInit() {
         var modal = new window.bootstrap.Modal(addEventModal);
         modal.show();
         /*eslint-disable-next-line*/
-        addEventModal.querySelector(".modal-title").innerText = "Add Action"
         Selected_id = null
 
         var flatpickr = document.querySelector(Selectors.EVENT_START_DATE)._flatpickr;
+        document.querySelector(Selectors.EVENT_END_DATE)._flatpickr.clear();
 
         flatpickr.setDate(flatpickr.parseDate(info.dateStr, "Y-m-d"));
       },
@@ -4866,6 +4864,7 @@ var appCalendarInit = function appCalendarInit() {
           end: event.event.endStr,
           action_id: event.event.id,
           csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+          employee_id: selected_emp,
           event: 'add_edit_time',
         }
         $.ajax({
@@ -4885,6 +4884,7 @@ var appCalendarInit = function appCalendarInit() {
           end: event.event.endStr,
           action_id: event.event.id,
           csrfmiddlewaretoken: document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+          employee_id: selected_emp,
           event: 'add_edit_time',
         }
         $.ajax({
@@ -4898,9 +4898,6 @@ var appCalendarInit = function appCalendarInit() {
         }
       })
       },
-     eventRender: function(view, element) {
-        var date = calendar.getDate()
-     },
     });
     updateTitle(calendar.currentData.viewTitle);
     document.querySelectorAll(Selectors.DATA_EVENT).forEach(function (button) {
@@ -4955,6 +4952,7 @@ var appCalendarInit = function appCalendarInit() {
       var temp_data = {
         action_id: Selected_id,
         csrfmiddlewaretoken: csrfmiddlewaretoken.value,
+        employee_id: selected_emp,
         title: title.value,
         start: startDate.value,
         end: endDate.value,
@@ -4970,6 +4968,7 @@ var appCalendarInit = function appCalendarInit() {
             delete temp_data['action_id']
             delete temp_data['event']
             delete temp_data['csrfmiddlewaretoken']
+            delete temp_data['employee_id']
             if(response.action_id){
                 if(existing_id){
                     // remove the id so that we can add the update event back.
@@ -12954,7 +12953,6 @@ docReady(ratingInit);
 docReady(draggableInit);
 docReady(kanbanInit);
 docReady(fullCalendarInit);
-docReady(appCalendarInit);
 docReady(managementCalendarInit);
 docReady(lottieInit);
 docReady(wizardInit);

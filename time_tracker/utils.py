@@ -102,22 +102,16 @@ def add_edit_time(user, post):
             start = datetime.fromisoformat(start)
         except:
             start = datetime.strptime(start, '%I:%M%p %b %d, %Y')
-        if user_timezone:
-            start = start.replace(tzinfo=user_timezone)
-            start = start.astimezone(timezone.utc)
-        else:
-            start = start.replace(tzinfo=timezone.utc)
+        start = start.replace(tzinfo=user_timezone)
+        start = start.astimezone(timezone.utc)
         data['start'] = start
     if end:
         try:
             end = datetime.fromisoformat(end)
         except:
             end = datetime.strptime(end, '%I:%M%p %b %d, %Y')
-        if user_timezone:
-            end = end.replace(tzinfo=user_timezone)
-            end = end.astimezone(timezone.utc)
-        else:
-            end = end.replace(tzinfo=timezone.utc)
+        end = end.replace(tzinfo=user_timezone)
+        end = end.astimezone(timezone.utc)
         data['end'] = end
         if end < start:
             return ['End date was before start date']

@@ -27,4 +27,6 @@ def get_timezone(user):
             used_timezone = company.timezone
         elif not used_timezone:
             used_timezone = company.timezone
+    if not used_timezone:
+        used_timezone = timezone.timezone.utc
     return used_timezone

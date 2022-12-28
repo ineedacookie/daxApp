@@ -41,6 +41,7 @@ class CustomUser(AbstractUser):
     verified = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
+    full_name = models.CharField(_('Full Name'), max_length=200, blank=True, null=True, default=None)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -52,6 +53,7 @@ class CustomUser(AbstractUser):
 
     def save(self, *args, **kwargs):
         created = not self.pk
+        self.update_full_name()
         super().save(*args, **kwargs)
         if not self.company:
             # This is the first instance of this employee lets give them a company if they don't already have one.
@@ -60,6 +62,15 @@ class CustomUser(AbstractUser):
             self.company = company
         if created:
             TTUserInfo.objects.create(user=self)
+
+    def update_full_name(self):
+        """
+        Stores the full name as last_name, first_name middle_name.
+        """
+        text = self.last_name + ', ' + self.first_name
+        if self.middle_name:
+            text += ' ' + self.middle_name
+        self.full_name = text.upper()
 
 
 class CompanyConnection(models.Model):

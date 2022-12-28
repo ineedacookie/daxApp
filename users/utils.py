@@ -4,6 +4,9 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
 from .tokens import account_activation_token
+from daxApp.encryption import encrypt_id, decrypt_id
+from django.core.paginator import Paginator
+from .models import CustomUser
 
 
 def check_employee_form(current_site, form, initial_email, send=True):
@@ -41,3 +44,21 @@ def check_employee_form(current_site, form, initial_email, send=True):
     else:
         return_dict = {'change_email': False, 'success': False, 'form': form}
     return return_dict
+
+
+def get_selectable_employees(user, page=1, query=''):
+    return_list = []
+    employees = CustomUser.objects.filter(company=user.company, full_name__contains=query).order_by('last_name',
+                                                                                                    'first_name')
+    p = Paginator(employees, 30)
+    for employee in p.page(page).object_list:
+        text = employee.last_name + ', ' + employee.first_name
+        if employee.middle_name:
+            text += ' ' + employee.middle_name
+        return_list.append({
+            'id': encrypt_id(employee.id),
+            'text': text
+        })
+    more = page * 30 < p.count
+
+    return return_list, more
