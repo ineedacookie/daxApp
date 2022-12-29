@@ -4803,7 +4803,7 @@ var appCalendarInit = function appCalendarInit() {
   if (appCalendar) {
     var calendar = renderCalendar(appCalendar, {
       headerToolbar: false,
-      dayMaxEvents: 2,
+      dayMaxEvents: 3,
       height: 800,
       stickyHeaderDates: false,
       displayEventEnd: {
@@ -4811,6 +4811,7 @@ var appCalendarInit = function appCalendarInit() {
         'basicWeek': true,
         'default': true
       },
+      initialView: 'listWeek',
       eventTimeFormat: {
         hour: 'numeric',
         minute: '2-digit',
