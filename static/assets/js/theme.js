@@ -4754,8 +4754,10 @@ var events = [{
 -----------------------------------------------*/
 
 var selected_emp = ''
+var modify_times_calendar = null
 
 var appCalendarInit = function appCalendarInit() {
+  var selected_event_id = null
   var Selectors = {
     ACTIVE: '.active',
     ADD_EVENT_FORM: '#addEventForm',
@@ -4770,9 +4772,9 @@ var appCalendarInit = function appCalendarInit() {
     EVENT_TITLE: '#addEventModal [name="title"]',
     EVENT_DESCRIPTION: '#addEventModal [name="description"]',
     CSRF_INPUT: '[name="csrfmiddlewaretoken"]',
-    INPUT_TITLE: '[name="title"]'
+    INPUT_TITLE: '[name="title"]',
+    DELETE_BTN: '#delete_event_button'
   };
-  var Selected_id = null;
   var Events = {
     CLICK: 'click',
     SHOWN_BS_MODAL: 'shown.bs.modal',
@@ -4796,6 +4798,7 @@ var appCalendarInit = function appCalendarInit() {
   var appCalendar = document.querySelector(Selectors.CALENDAR);
   var addEventForm = document.querySelector(Selectors.ADD_EVENT_FORM);
   var addEventModal = document.querySelector(Selectors.ADD_EVENT_MODAL);
+  var deleteBtn = document.querySelector(Selectors.DELETE_BTN);
 
   if (appCalendar) {
     var calendar = renderCalendar(appCalendar, {
@@ -4843,7 +4846,8 @@ var appCalendarInit = function appCalendarInit() {
           } else {
             document.querySelector(Selectors.EVENT_DESCRIPTION).innerText = ""
           }
-          Selected_id = info.event.id
+          selected_event_id = info.event.id
+          deleteBtn.classList.remove('hidden');
 
         }
       },
@@ -4851,7 +4855,7 @@ var appCalendarInit = function appCalendarInit() {
         var modal = new window.bootstrap.Modal(addEventModal);
         modal.show();
         /*eslint-disable-next-line*/
-        Selected_id = null
+        selected_event_id = null
 2
         var flatpickr = document.querySelector(Selectors.EVENT_START_DATE)._flatpickr;
 
@@ -4898,6 +4902,7 @@ var appCalendarInit = function appCalendarInit() {
       })
       },
     });
+    modify_times_calendar = calendar
     updateTitle(calendar.currentData.viewTitle);
     document.querySelectorAll(Selectors.DATA_EVENT).forEach(function (button) {
       button.addEventListener(Events.CLICK, function (e) {
@@ -4939,6 +4944,7 @@ var appCalendarInit = function appCalendarInit() {
         updateTitle(calendar.currentData.viewTitle);
       });
     });
+
     addEventForm && addEventForm.addEventListener(Events.SUBMIT, function (e) {
       e.preventDefault();
       var _e$target = e.target,
@@ -4949,7 +4955,7 @@ var appCalendarInit = function appCalendarInit() {
           description = _e$target.description;
       let end = endDate.value
       var temp_data = {
-        action_id: Selected_id,
+        action_id: selected_event_id,
         csrfmiddlewaretoken: csrfmiddlewaretoken.value,
         employee_id: selected_emp,
         title: title.value,
@@ -4992,6 +4998,24 @@ var appCalendarInit = function appCalendarInit() {
   addEventModal && addEventModal.addEventListener(Events.SHOWN_BS_MODAL, function (_ref13) {
     var currentTarget = _ref13.currentTarget;
     currentTarget.querySelector(Selectors.INPUT_TITLE).focus();
+  });
+
+  deleteBtn && deleteBtn.addEventListener('click', function(){
+    if(selected_event_id){
+            $.ajax({
+                type:'POST',
+                url:this.getAttribute('data-url'),
+                data: {
+                    'action_id': selected_event_id,
+                    'csrfmiddlewaretoken': document.querySelector(Selectors.CSRF_INPUT).getAttribute('value'),
+                },
+                success:function(response){
+                    var temp_event = calendar.getEventById(selected_event_id)
+                    temp_event.remove()
+                }
+            });
+            window.bootstrap.Modal.getInstance(addEventModal).hide();
+        }
   });
 };
 /*-----------------------------------------------

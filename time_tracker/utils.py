@@ -139,3 +139,18 @@ def add_edit_time(user, post):
         errors = ['Missing important information necessary to add or update an action.']
 
     return errors, action_id
+
+
+def delete_event(user, action_id):
+    """
+    Handles deleting an existing action.
+    """
+    # TODO this should be updated to double check that the user has permissions to delete the other users action id. For now I will just assert that the users belong to the same company.
+    try:
+        event = InOutAction.objects.get(id=decrypt_id(action_id))
+    except InOutAction.DoesNotExist:
+        return {'errors': ['The action submitted does not exist'], 'Success': False}
+    if event.user.company == user.company:
+        event.delete()
+    return {'errors': [], 'Success': True}
+

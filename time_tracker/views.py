@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from .models import InOutAction, TTUserInfo
-from .utils import combine_comments, get_events_by_range, add_edit_time
+from .utils import combine_comments, get_events_by_range, add_edit_time, delete_event
 from users.models import CustomUser
 from daxApp.encryption import decrypt_id
 from daxApp.central_data import get_main_page_data
@@ -90,3 +90,9 @@ def fetch_actions(request):
         else:
             user = request.user
         return JsonResponse(data=get_events_by_range(user, in_start=request.POST.get('start'), in_end=request.POST.get('end')), status=201, safe=False)
+
+
+@login_required
+def delete_action(request):
+    if request.POST:
+        return JsonResponse(data=delete_event(request.user, request.POST.get('action_id', '')), status=201, safe=False)
