@@ -21,7 +21,11 @@
                 });
                 $('#employee_selector').on("change", function() {
                     selected_emp = this.options[this.selectedIndex].value;
-                    appCalendarInit();
+                    if(!document.getElementById('appCalendar').hasChildNodes()){
+                        appCalendarInit();
+                    } else {
+                        modify_times_calendar.refetchEvents();
+                    }
                 });
             </script>
         </div>
@@ -114,6 +118,7 @@
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
+                    <a id="delete_event_button" class="btn px-4 hidden" data-url="{% url 'delete_action' %}">Delete</a>
                     <button class="btn btn-primary px-4" type="submit">Save</button>
                 </div>
             </form>
@@ -123,9 +128,13 @@
 <script>
     $(document).ready(function(){
         $('#addEventModal').on('hidden.bs.modal', function(){
-            form = document.getElementById('addEventForm');
-            form.reset();
-            form.getElementsByClassName('modal-title')[0].innerText = "Add Action";
+            var event_form = document.getElementById('addEventForm');
+            event_form.reset();
+            event_form.getElementsByClassName('modal-title')[0].innerText = "Add Action";
+            var del_btn = document.getElementById('delete_event_button');
+            if(!del_btn.classList.contains('hidden')){
+                del_btn.classList.add('hidden');
+            }
         });
         var elements = $('.datetimepicker');
 
