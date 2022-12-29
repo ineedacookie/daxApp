@@ -4978,7 +4978,7 @@ var appCalendarInit = function appCalendarInit() {
                     temp_data.end = flatpickr.parseDate(temp_data.end, "G:iK  M d, Y").toISOString()
                   }
                 temp_data.start = flatpickr.parseDate(temp_data.start, "G:iK  M d, Y").toISOString()
-                calendar.addEvent(temp_data);
+                calendar.addEvent(temp_data, calendar.getEventSources()[0]);
             } else {
                 console.log(response.errors)
             }
