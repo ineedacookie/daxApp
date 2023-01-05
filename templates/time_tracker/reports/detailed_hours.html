@@ -1,0 +1,750 @@
+{% extends "time_tracker/reports/letter_head.html" %}
+{% block css %}
+{% if form.other_space_on_right %}
+div.container{
+    width: 80%;
+}
+{% endif %}
+
+{% if form.other_new_page_for_each_employee %}
+div.employee_section{
+        page-break-after: always;
+    }
+{% endif %}
+{% if form.other_font_size == 'small' %}
+p, div, .memo {
+    font-size: 6px;
+}
+
+h2, .emp_totals_header, .emp_totals_header div, .grand_totals_header, .input_row, input {
+    font-size: 10px;
+}
+
+.week_totals_header {
+    font-size: 8px;
+}
+{% elif form.other_font_size == 'large' %}
+p, div, .memo {
+    font-size: 12px;
+}
+
+h2, .emp_totals_header, .emp_totals_header div, .grand_totals_header, .input_row, input {
+    font-size: 18px;
+}
+
+.week_totals_header {
+    font-size: 14px;
+}
+{% else %}
+p, div, .memo {
+    font-size: 10px;
+}
+
+h2, .emp_totals_header, .emp_totals_header div, .grand_totals_header, .input_row, input {
+    font-size: 14px;
+}
+
+.week_totals_header {
+    font-size: 12px;
+}
+{% endif %}
+
+div.employee_section{
+    margin-bottom: 7em;
+}
+        .top_bar {
+    display: inline-block;
+    width: 100%;
+}
+
+.top_bar div {
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+
+.left_side {
+    text-align: left;
+}
+
+.right_side {
+    text-align: right;
+}
+
+p.lighter_text {
+    color: darkgray;
+}
+
+.top_bar div p {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+hr {
+    border-width: 2px;
+    border-left-width: 0px;
+}
+
+.previous {
+    color: #2aa5d5;
+}
+
+
+
+h2 {
+    margin-bottom: 0;
+}
+.italics {
+    font-style: italic;
+}
+hr.lighter {
+    border-top-width: 1px;
+    border-top-color: lightgray;
+    margin: 0;
+}
+
+.border-top {
+    border-width: 0px;
+    border-top-width: 1px;
+    border-top-color: darkgray;
+    border-style: solid;
+}
+
+.week_header {
+    margin-top: .5em;
+    margin-bottom: 1em;
+}
+
+.week_section {
+    padding-left: 1em;
+}
+
+table.day_section {
+    width: 100%;
+}
+
+td.day_date {
+    text-align: right;
+    width: 20%;
+    vertical-align: top;
+}
+
+.action_info {
+    width: 100%;
+    display: inline-block;
+}
+
+.action_1 {width: 40%;}
+
+.action_2 {
+    width: 30%;
+}
+
+.action_total {
+    width: 30%;
+}
+
+.action_info div {
+    float: left;
+    text-align: right;
+}
+
+.comments, .additional_text {
+    padding-right: 138px;
+    padding-left: 50px;
+}
+
+.auto_inserted {
+    color: blue;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.action_2.bold {
+    width: 70%;
+}
+
+.week_totals {margin-top: 1em;}
+
+.week_totals .action_2, .emp_totals .action_2, .grand_totals .action_2 {
+    width: 70%;
+}
+
+.week_totals .action_total, .emp_totals .action_total, .grant_totals .action_total {width: 30%;}
+
+body {
+    background-color: rgb(82, 86, 89);
+}
+
+div.paper {
+    max-width: 595px;
+    min-width: 595px;
+    background-color: white;
+    box-shadow: rgb(0,0,0,0.7) 0px 0px 20px 0px;
+    margin: auto;
+    margin-top: 3em;
+    margin-bottom: 3em;
+    padding: .5in;
+}
+
+@media print {
+    body {
+        background-color: transparent;
+    }
+    div.paper {
+        visibility: visible;
+        box-shadow: none;
+        margin: auto;
+        padding: 0;
+    }
+    div.employee_section{
+        margin: 0;
+    }
+    .print_btn{
+        display: none;
+        visibility: hidden;
+    }
+    textarea {
+        border: none;
+        overflow: auto;
+        outline: none;
+
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+
+        resize: none; /*remove the resize handle on the bottom right*/
+    }
+    input {
+        border: none;
+        overflow: auto;
+        outline: none;
+
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+    }
+}
+
+.emp_totals_header div {
+    float: left;
+    width: 50%;
+    margin-top: .5em;
+}
+
+.emp_totals_header {height: 50px;}
+
+div, p, td {
+    font-family: sans-serif;
+}
+
+.grayed_out {
+    color: darkgray;
+}
+
+.emp_totals {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+table.signature_box, textarea, input {
+    width: 100%;
+}
+
+.signature_box {
+    margin-top: 2em;
+}
+
+td.action_info_days {
+    padding: 0;
+}
+
+
+
+{% endblock %}
+{% block title %}{{ company.name }} Detailed Hours Report{% endblock %}
+{% block report %}{{ company.name }} Detailed Hours Report{% endblock %}
+{% block content %}
+
+{% if form.display_clock_actions or form.display_day_totals or form.display_week_totals or form.display_employee_totals %}
+{% for employee in employees %}
+    <div class="employee_section">
+        <div class="employee_header">
+            <h2 class="employee_name">{{ employee.name }}</h2>
+            <hr class="lighter"/>
+        </div>
+        {% for week in employee.weeks %}
+            {% if week.total_with_break %}
+                <div class="week_section">
+                    {% if form.display_day_totals or form.display_clock_actions %}
+                        <div class="week_header">
+                            <div class="week_and_range">Week {{ week.number }} (
+                                {% if week.previous_total > 0 %}
+                                    <span class="previous">{{ week.begin_date }}</span>
+                                {% else %}
+                                    {{ week.begin_date }}
+                                {% endif %}
+                                 - {{ week.end_date }})
+                            </div>
+                            <hr class="lighter"/>
+                        </div>
+                    {% endif %}
+                    {% if week.previous_total > 0 and week.weekly_overtime > 0%}
+                        <div class="previous_hours_section">
+                            <div class="previous_header">
+                                <div class="previous left_side">
+                                    Previous Hours Data ({{ previous_date_range }})
+                                </div>
+                                <div class="previous right_side italics">
+                                    (Used ONLY for Weekly OT Calculation)
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% for day in week.days %}
+                        {% if day.previous %}
+                            {% if day.weekly_overtime > 0 %}
+                                <table class="day_section previous">
+                                    <tr>
+                                        <td class="day_date" width="20%">{% if form.display_clock_actions %}{{ day.date_str }}*{% endif %}</td>
+                                        <td class="action_info_days" width="80%">
+                                            {% if form.display_clock_actions %}
+                                            {% for action in day.actions %}
+                                                <div class="action_info">
+                                                    <div class="action_1 {% if action.temp_start %}auto_inserted{% endif %}">{{ action.first_action }}</div>
+                                                    <div class="action_2 {% if action.temp_end %}auto_inserted{% endif %}">{{ action.second_action }}</div>
+                                                    <div class="action_total">{{ action.str_total }}</div>
+                                                </div>
+                                            {% if form.display_employee_comments and action.comment %}
+                                                <div class="comments">{{ action.comment }}</div>
+                                            {% endif %}
+                                            {% if action.additional_text %}
+                                                <div class="additional_text auto_inserted">{{ action.additional_text }}</div>
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if form.display_day_totals %}
+                                    <tr>
+                                        <td class="day_date" width="20%"></td>
+                                        <td class="action_info" width="80%">
+                                            <div class="action_1"></div>
+                                            <div class="action_2 bold">Total {{ day.date_str }}</div>
+                                            <div class="action_total bold">{% if employee.paid_breaks %}{{ day.str_total_with_break }}{% else %}{{ day.str_total }}{% endif %}</div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            {% endif %}
+                        {% else %}
+                            <table class="day_section">
+                                <tr>
+                                    <td class="day_date" width="20%">{% if form.display_clock_actions %}{{ day.date_str }}{% endif %}</td>
+                                    <td class="action_info_days" width="80%">
+                                        {% if form.display_clock_actions %}
+                                        {% for action in day.actions %}
+                                            <div class="action_info">
+                                                <div class="action_1 {% if action.temp_start %}auto_inserted{% endif %}">{{ action.first_action }}</div>
+                                                <div class="action_2 {% if action.temp_end %}auto_inserted{% endif %}">{{ action.second_action }}</div>
+                                                <div class="action_total">{{ action.str_total }}</div>
+                                            </div>
+                                            {% if form.display_employee_comments and action.comment %}
+                                                <div class="comments">{{ action.comment }}</div>
+                                            {% endif %}
+                                            {% if action.additional_text %}
+                                                <div class="additional_text auto_inserted">{{ action.additional_text }}</div>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if form.display_day_totals %}
+                                <tr>
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2 bold">Total {{ day.date_str }}</div>
+                                        <div class="action_total bold">{% if employee.paid_breaks %}{{ day.str_total_with_break }}{% else %}{{ day.str_total }}{% endif %}</div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        {% endif %}
+                    {% endfor %}
+                    {%if form.display_week_totals %}
+                    <div class="week_totals">
+                        <hr class="lighter"/>
+                        <div class="week_totals_header bold">
+                            Week {{ week.number }} Totals ({{ week.begin_date }} - {{ week.end_date }})
+                        </div>
+                        <hr class="lighter"/>
+                        <table class="day_section">
+                            {% if week.previous_total > 0 and week.weekly_overtime > 0 %}
+                                <tr class="previous">
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Previous Hours (for OT)</div>
+                                        <div class="action_total">{{ week.str_previous_total }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.previous_breaks > 0 and week.weekly_overtime %}
+                                <tr class="previous">
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Previous Break Hours</div>
+                                        <div class="action_total">{{ week.str_previous_breaks }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.regular > 0 %}
+                                <tr>
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Regular Hours</div>
+                                        <div class="action_total">{{ week.str_regular }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.break > 0 %}
+                                <tr  class="{% if not employee.paid_breaks %}grayed_out{% endif %}" >
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">On Break Hours</div>
+                                        <div class="action_total">{{ week.str_break }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.daily_overtime > 0 %}
+                                <tr class="grayed_out">
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Daily OT Hours</div>
+                                        <div class="action_total">{{ week.str_daily_overtime }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.double_time > 0 %}
+                                <tr>
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Double Time Hours</div>
+                                        <div class="action_total">{{ week.str_double_time }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.weekly_overtime > 0 %}
+                                <tr class="grayed_out">
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Weekly OT Hours</div>
+                                        <div class="action_total">{{ week.str_weekly_overtime }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.overtime > 0 %}
+                                <tr>
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2">Total Overtime Hours</div>
+                                        <div class="action_total">{{ week.str_overtime }}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                            {% if week.total > 0 %}
+                                <tr class="horizontal_line_above">
+                                    <td class="day_date" width="20%"></td>
+                                    <td class="action_info bold" width="80%">
+                                        <div class="action_1"></div>
+                                        <div class="action_2 border-top">Total</div>
+                                        <div class="action_total border-top">{% if employee.paid_breaks %}{{ week.str_total_with_break }}{% else %}{{ week.str_total }}{% endif %}</div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% empty %}
+            <div class="message">
+                No times for this employee
+            </div>
+        {% endfor %}
+
+        {% if form.display_employee_totals and employee.total_with_break > 0 %}
+            <div class="emp_totals">
+                <hr class="lighter"/>
+                <div class="emp_totals_header bold">
+                    <div class="left_side">
+                        Final Totals ({{ begin_date }} - {{ end_date }})
+                    </div>
+                    <div class="right_side">
+                        {{ employee.name }}
+                    </div>
+                </div>
+                <hr class="lighter"/>
+                <table class="day_section">
+                    {% if employee.previous_total > 0 and employee.weekly_overtime > 0 %}
+                        <tr class="previous">
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Previous Hours (for OT)</div>
+                                <div class="action_total">{{ employee.str_previous_total }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.previous_breaks > 0 and employee.weekly_overtime > 0 %}
+                        <tr class="previous">
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Previous Break Hours</div>
+                                <div class="action_total">{{ employee.str_previous_breaks }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.total > 0 %}
+                        <tr>
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Regular Hours</div>
+                                <div class="action_total">{{ employee.str_regular }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.break > 0 %}
+                        <tr  class="{% if not employee.paid_breaks %}grayed_out{% endif %}" >
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">On Break Hours</div>
+                                <div class="action_total">{{ employee.str_break }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.daily_overtime > 0 %}
+                        <tr class="grayed_out">
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Daily OT Hours</div>
+                                <div class="action_total">{{ employee.str_daily_overtime }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.double_time > 0 %}
+                        <tr>
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Double Time Hours</div>
+                                <div class="action_total">{{ employee.str_double_time }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.weekly_overtime > 0 %}
+                        <tr class="grayed_out">
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Weekly OT Hours</div>
+                                <div class="action_total">{{ employee.str_weekly_overtime }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.overtime > 0 %}
+                        <tr>
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2">Total Overtime Hours</div>
+                                <div class="action_total">{{ employee.str_overtime }}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% if employee.total > 0 %}
+                        <tr class="horizontal_line_above">
+                            <td class="day_date" width="20%"></td>
+                            <td class="action_info bold" width="80%">
+                                <div class="action_1"></div>
+                                <div class="action_2 border-top">Total</div>
+                                <div class="action_total border-top">{% if employee.paid_breaks %}{{ employee.str_total_with_break }}{% else %}{{ employee.str_total }}{% endif %}</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        {% endif %}
+        {% if form.other_memo %}
+            <h2 class="memo_header">Memo:</h2>
+            <textarea class="memo" rows="10" style="margin:auto;"></textarea>
+        {% endif %}
+        {% if form.add_employee_signature_line %}
+            <table class="signature_box">
+                <tr class="input_row bold">
+                    <td width="75%">
+                        <input type="text">
+                    </td>
+                    <td width="5%"></td>
+                    <td width="20%">
+                        <input style="text-align:center;" name="date" type="text">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border-top" width="75%">
+                        {{ employee.name }}
+                    </td>
+                    <td width="5%"></td>
+                    <td class="border-top" width="20%">
+                        Date
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+        {% if form.add_supervisor_signature_line %}
+            <table class="signature_box">
+                <tr class="input_row bold">
+                    <td width="75%">
+                        <input type="text">
+                    </td>
+                    <td width="5%"></td>
+                    <td width="20%">
+                        <input style="text-align:center;" name="date" type="text">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border-top" width="75%">
+                        Supervisor
+                    </td>
+                    <td width="5%"></td>
+                    <td class="border-top" width="20%">
+                        Date
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+        {% if form.add_other_signature_line %}
+            <table class="signature_box">
+                <tr class="input_row bold">
+                    <td width="75%">
+                        <input type="text">
+                    </td>
+                    <td width="5%"></td>
+                    <td width="20%">
+                        <input style="text-align:center;" name="date" type="text">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="border-top" width="75%">
+                        Other
+                    </td>
+                    <td width="5%"></td>
+                    <td class="border-top" width="20%">
+                        Date
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="message">No employees selected for the report</div>
+{% endfor %}
+{% endif %}
+
+{% if form.display_grand_totals and total_with_break > 0 %}
+<div class="grand_totals">
+    <hr class="lighter"/>
+    <div class="grand_totals_header bold">
+        Grand Totals ({{ begin_date }} - {{ end_date }})
+    </div>
+    <hr class="lighter"/>
+    <table class="day_section">
+        {% if total > 0 %}
+            <tr>
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">Regular Hours</div>
+                    <div class="action_total">{{ str_regular }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if break > 0 %}
+            <tr  class="{% if not paid_breaks %}grayed_out{% endif %}" >
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">On Break Hours</div>
+                    <div class="action_total">{{ str_break }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if daily_overtime > 0 %}
+            <tr class="grayed_out">
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">Daily OT Hours</div>
+                    <div class="action_total">{{ str_daily_overtime }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if double_time > 0 %}
+            <tr>
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">Double Time Hours</div>
+                    <div class="action_total">{{ str_double_time }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if weekly_overtime > 0 %}
+            <tr class="grayed_out">
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">Weekly OT Hours</div>
+                    <div class="action_total">{{ str_weekly_overtime }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if overtime > 0 %}
+            <tr>
+                <td class="day_date" width="20%"></td>
+                <td class="action_info" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2">Total Overtime Hours</div>
+                    <div class="action_total">{{ str_overtime }}</div>
+                </td>
+            </tr>
+        {% endif %}
+        {% if total > 0 %}
+            <tr class="horizontal_line_above">
+                <td class="day_date" width="20%"></td>
+                <td class="action_info bold" width="80%">
+                    <div class="action_1"></div>
+                    <div class="action_2 border-top">Total</div>
+                    <div class="action_total border-top">{% if paid_breaks %}{{ str_total_with_break }}{% else %}{{ str_total }}{% endif %}</div>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

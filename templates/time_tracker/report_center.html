@@ -1,0 +1,19 @@
+{% extends "general/nav_template.html" %}
+{% load static %}
+{% block title %}DaxApp | Reports{% endblock %}
+{% block content %}
+    <form id="report_form" method="post">
+                {% csrf_token %}
+                <div class="card-header px-card bg-light border-bottom-0">
+                    <h5 class="modal-title">Add Action</h5>
+                </div>
+                    <div class="card-body">
+                        {{ form }}
+                    </div>
+                <div class="card-footer d-flex align-items-center bg-light border-0">
+                    <button class="btn btn-primary px-4" type="submit">Save</button>
+                </div>
+            </form>
+{% endblock %}
+{% block beforeThemeScript %}
+{% endblock %}

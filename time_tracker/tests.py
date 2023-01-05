@@ -1,7 +1,10 @@
 from django.test import TestCase
-from users.models import CustomUser, Company
-from .models import TTUserInfo, TTCompanyInfo, InOutAction
 from django.utils import timezone
+from datetime import date, timedelta
+
+from users.models import CustomUser, Company
+from .forms import ReportsForm
+from .models import TTUserInfo, TTCompanyInfo, InOutAction
 
 
 class ModelsTest(TestCase):
@@ -23,7 +26,8 @@ class ModelsTest(TestCase):
         self.assertEqual(c_info.default_daily_overtime_value, 12)
 
         # user created with company uses default company info in TTuserinfo
-        user = CustomUser.objects.create(first_name='temp', last_name='employee', email='temployee@test.com', company=company)
+        user = CustomUser.objects.create(first_name='temp', last_name='employee', email='temployee@test.com',
+                                         company=company)
         u_info = TTUserInfo.objects.filter(user=user)
         self.assertTrue(u_info)
         self.assertEqual(u_info[0].daily_overtime_value, 12)
@@ -59,7 +63,6 @@ class ModelsTest(TestCase):
         user_info = TTUserInfo.objects.filter(user=user)[0]
         self.assertEqual(user_info.time_action, clock_in)
 
-
         break_in = InOutAction.objects.create(type='b', user=user)
         self.assertEqual(break_in.action_lookup_datetime, break_in.start)
         self.assertEqual(break_in.total_time, 0)
@@ -75,3 +78,96 @@ class ModelsTest(TestCase):
 
         user_info = TTUserInfo.objects.filter(user=user)[0]
         self.assertEqual(user_info.break_action, break_in)
+
+
+class TestForms(TestCase):
+    """
+    Test the following forms
+    ReportsForm, TimeActionForm, EmployeeTimeActionForm
+    """
+
+    def test_reportsform(self):
+        """
+        Testing validation of the reports form
+        initial values test, company with no employees
+        :return:
+        """
+        company = Company.objects.create(name='TimeClick')
+
+        with self.assertRaises(KeyError):
+            ReportsForm()
+
+        form = ReportsForm(company=company)
+        self.assertFalse(form.is_valid())
+        form = ReportsForm(company=company, data={'begin_date': timezone.now(), 'end_date': timezone.now()})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors,
+                         {'report_type': ['This field is required.'], 'other_rounding': ['This field is required.'],
+                          'other_hours_format': ['This field is required.'],
+                          'other_font_size': ['This field is required.']})
+        form = ReportsForm(company=company, data={'begin_date': timezone.now(), 'end_date': timezone.now(),
+                                                  'report_type': 'reports/summary.html', 'other_rounding': 5,
+                                                  'other_hours_format': 'hours_and_minutes',
+                                                  'other_font_size': 'large'})
+        self.assertTrue(form.is_valid())
+        form = ReportsForm(company=company, data={'begin_date': 'panda', 'end_date': 'kungfu',
+                                                  'report_type': 0, 'other_rounding': 'junk',
+                                                  'other_hours_format': 'im_not_an_option',
+                                                  'other_font_size': 'Loud'})
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {'begin_date': ['Enter a valid date.'], 'end_date': ['Enter a valid date.'],
+                                       'report_type': ['Select a valid choice. 0 is not one of the available choices.'],
+                                       'other_rounding': [
+                                           'Select a valid choice. junk is not one of the available choices.'],
+                                       'other_hours_format': [
+                                           'Select a valid choice. im_not_an_option is not one of the available choices.'],
+                                       'other_font_size': [
+                                           'Select a valid choice. Loud is not one of the available choices.']})
+
+        pass
+
+
+class TestReport(TestCase):
+    """
+    Test the report generator
+    """
+
+    def __init__(self):
+        # test data is a representation of the database, we will use it create a temp database and then run a report on
+        # it and verify the results against test_answers
+        test_data = [
+            {'company': {
+                'data': {'name': 'Empire'},
+                'tt_data': {},
+                'employees': [
+                    {
+                        'data': {
+                            'first_name': 'bill',
+                            'last_name': 'caspy',
+                            'email': 'billy@temp.com'
+                        },
+                        'tt_data': {},
+                        'actions': []
+                    },
+                    {
+                        'data': {
+                            'first_name': 'darth',
+                            'last_name': 'vader',
+                            'middle_name': 'A',
+                            'email': 'vader@temp.com',
+                        },
+                        'tt_data': {},
+                        'actions': []
+                    },
+                    {
+                        'data': {
+                            'first_name': 'luke',
+                            'last_name': 'skywalker',
+                            'email': 'sith@temp.com'
+                        },
+                        'tt_data': {},
+                        'actions': []
+                    }
+                ]
+            }}
+        ]

@@ -67,9 +67,12 @@ class CustomUser(AbstractUser):
         """
         Stores the full name as last_name, first_name middle_name.
         """
-        text = self.last_name + ', ' + self.first_name
-        if self.middle_name:
-            text += ' ' + self.middle_name
+        if self.first_name and self.last_name:
+            text = self.last_name + ', ' + self.first_name
+            if self.middle_name:
+                text += ' ' + self.middle_name
+        else:
+            text = ''
         self.full_name = text.upper()
 
 

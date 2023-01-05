@@ -96,6 +96,7 @@ class TTCompanyInfo(models.Model):
     default_enable_breaks = models.BooleanField(default=True)
     default_breaks_are_paid = models.BooleanField(default=False, blank=True)
     default_include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
+    use_company_defaults_for_all_employees = models.BooleanField(default=False, blank=True)
     display_employee_times_with_timezone = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)

@@ -10,6 +10,8 @@ from users.models import CustomUser
 from daxApp.encryption import decrypt_id
 from daxApp.central_data import get_main_page_data
 from users.utils import get_selectable_employees
+from .forms import ReportsForm
+from .report import generate_report
 
 logger = logging.getLogger("django.request")
 
@@ -96,3 +98,17 @@ def fetch_actions(request):
 def delete_action(request):
     if request.POST:
         return JsonResponse(data=delete_event(request.user, request.POST.get('action_id', '')), status=201, safe=False)
+
+
+@login_required
+def report_center(request):
+    """Manages the report center for time tracking"""
+    page = 'time_tracker/report_center.html'
+    page_arguments = get_main_page_data(request.user)
+
+    if request.POST:
+        return generate_report(request, page, page_arguments)
+    else:
+        form = ReportsForm(company=request.user.company)
+        page_arguments['form'] = form
+    return render(request, page, page_arguments)

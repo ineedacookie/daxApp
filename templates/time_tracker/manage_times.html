@@ -84,6 +84,11 @@
     <div class="card-body p-0 scrollbar">
         <div class="calendar-outline" id="appCalendar"></div>
     </div>
+    {% if not company.use_company_timezone %}
+        <div>
+            <p>*Times are displayed/updated in the users timezone.</p>
+        </div>
+    {% endif %}
 </div>
 <div class="modal fade" id="addEventModal" tabindex="-1">
     <div class="modal-dialog">
