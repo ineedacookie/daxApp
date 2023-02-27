@@ -93,6 +93,7 @@ class TTCompanyInfo(models.Model):
     default_double_time = models.BooleanField(default=False)
     default_double_time_value = models.IntegerField(default=12, validators=[MaxValueValidator(23), MinValueValidator(1)],
                                             blank=True)
+    default_california_overtime = models.BooleanField(default=False)
     default_enable_breaks = models.BooleanField(default=True)
     default_breaks_are_paid = models.BooleanField(default=False, blank=True)
     default_include_breaks_in_overtime_calculation = models.BooleanField(default=False, blank=True)
@@ -129,6 +130,7 @@ class TTUserInfo(models.Model):
     double_time_value = models.IntegerField(default=None,
                                                     validators=[MaxValueValidator(23), MinValueValidator(1)],
                                                     blank=True, null=True)
+    california_overtime = models.BooleanField(default=False)
     use_company_default_break_settings = models.BooleanField(default=True, null=True, blank=True)
     enable_breaks = models.BooleanField(default=None, null=True, blank=True)
     breaks_are_paid = models.BooleanField(default=None, blank=True, null=True)
@@ -143,7 +145,7 @@ class TTUserInfo(models.Model):
             if tt_company:
                 tt_company = tt_company[0]
                 for i in ['weekly_overtime', 'weekly_overtime_value', 'daily_overtime', 'daily_overtime_value', 'double_time', 'double_time_value',
-                          'enable_breaks', 'breaks_are_paid', 'include_breaks_in_overtime_calculation']:
+                          'california_overtime', 'enable_breaks', 'breaks_are_paid', 'include_breaks_in_overtime_calculation']:
                     if getattr(self, i) is None:
                         setattr(self, i, getattr(tt_company, 'default_' + i))
         super().save(*args, **kwargs)

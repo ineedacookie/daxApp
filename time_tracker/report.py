@@ -20,16 +20,16 @@ def generate_report(request, page, page_arguments, override_timezone=None):
     if not override_timezone and request.user.company.use_company_timezone:
         override_timezone = get_timezone(request.user)
 
-    origional_form = ReportsForm(request.POST, company=request.user.company, user=request.user)
-    if origional_form.is_valid():
-        form = origional_form.cleaned_data
+    original_form = ReportsForm(request.POST, company=request.user.company, user=request.user)
+    if original_form.is_valid():
+        form = original_form.cleaned_data
         """Grab employee list"""
         employee_list, employee_id_list = get_employee_list(request.user.company, form['selected_employees_list'])
 
         if not employee_list:
             logging.error("An invalid request to generate a report was received no employees selected")
             messages.warning(request, 'No employees selected')
-            page_arguments['form'] = origional_form
+            page_arguments['form'] = original_form
             return render(request, page, page_arguments)
 
         """Get the company time tracker info"""
@@ -48,12 +48,12 @@ def generate_report(request, page, page_arguments, override_timezone=None):
         if not page_arguments.get('error', None):
             page = form['report_type']
         else:
-            page_arguments['form'] = origional_form
+            page_arguments['form'] = original_form
         return render(request, page, page_arguments)
     else:
         logging.error("An invalid request to generate a report was received")
         messages.warning(request, 'Please fix the error below')
-        page_arguments['form'] = origional_form
+        page_arguments['form'] = original_form
         return render(request, page, page_arguments)
 
 
@@ -390,6 +390,7 @@ class Report:
             weekly_overtime = self.company_info.default_weekly_overtime
             weekly_overtime_value = self.company_info.default_weekly_overtime_value
             breaks_are_paid = self.company_info.default_breaks_are_paid
+            california_overtime = self.company_info.default_california_overtime
         else:
             daily_overtime = employee.daily_overtime
             daily_overtime_value = employee.daily_overtime_value
@@ -399,6 +400,7 @@ class Report:
             weekly_overtime = employee.weekly_overtime
             weekly_overtime_value = employee.weekly_overtime_value
             breaks_are_paid = employee.breaks_are_paid
+            california_overtime = employee.california_overtime
         return {
             'daily_overtime_s': daily_overtime,
             'daily_overtime_value': daily_overtime_value,
@@ -407,6 +409,7 @@ class Report:
             'double_time_value': double_time_value,
             'weekly_overtime_s': weekly_overtime,
             'weekly_overtime_value': weekly_overtime_value,
+            'california_overtime_s': california_overtime,
             'paid_breaks': breaks_are_paid,
         }
 
@@ -601,15 +604,29 @@ class Report:
     def add_day(self, days, day_info, tt_settings):
         """Otherwise add the day to the days array"""
         """Calculate day totals"""
+        cali_7th_day_qualified = False
         day_info['date_str'] = day_info['date'].strftime('%a %m/%d/%y')
 
-        self.calc_day_totals(day_info, tt_settings)
+        """If california overtime is enabled check if there are 7 consecutive days where the first 6 are more than 8 hours worked. If that is met then the first 8 hours of the 7th day is marked as double time."""
+        if tt_settings['california_overtime_s'] and len(days) == 6:
+            cali_7th_day_qualified = True
+            hours = 8
+            if self.form['other_hours_format'] == 'hours_and_minutes':
+                hours = hours * 60
+            for day in days:
+                if not (day['total'] >= hours):
+                    cali_7th_day_qualified = False
+                    break
+        if cali_7th_day_qualified:
+            self.calc_day_totals(day_info, tt_settings, cal_overtime=8)
+        else:
+            self.calc_day_totals(day_info, tt_settings)
 
         days.append(day_info)
         day_info = {}
         return days, day_info
 
-    def calc_day_totals(self, temp_day_info, tt_settings):
+    def calc_day_totals(self, temp_day_info, tt_settings, cal_overtime=0):
         """Go through the actions and total up the daily total and break total for hourly and hour:minute"""
         if self.form['other_hours_format'] == 'decimal':
             temp_day_info['total'] = 0.0
@@ -638,6 +655,17 @@ class Report:
                 actual_time = temp_day_info['total'] + temp_day_info['break']
             else:
                 actual_time = temp_day_info['total']
+
+            if cal_overtime:
+                if self.form['other_hours_format'] == 'hours_and_minutes':
+                    cal_overtime = cal_overtime * 60
+                if actual_time >= cal_overtime:
+                    actual_time = actual_time - cal_overtime
+                    temp_day_info['double_time'] = cal_overtime
+                else:
+                    temp_day_info['double_time'] = actual_time
+                    actual_time = 0
+
             calc_daily_overtime_value = tt_settings['daily_overtime_value']
             if self.form['other_hours_format'] == 'hours_and_minutes':
                 calc_daily_overtime_value = calc_daily_overtime_value * 60
@@ -736,6 +764,7 @@ class Report:
                             'previous_daily_overtime'] - week_info['previous_double_time']
                     else:
                         actual_time = actual_time - week_info['daily_overtime'] - week_info['previous_daily_overtime']
+
                 """If the total hours pass the overtime threshold after all our adjustments then calculate weekly overtime."""
                 calc_weekly_overtime_value = tt_settings['weekly_overtime_value']
                 if self.form['other_hours_format'] == 'hours_and_minutes':
