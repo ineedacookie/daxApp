@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -9,6 +9,11 @@ from django.utils.translation import gettext_lazy as _
 def grab_begin_date():
     return_date = date.today()
     return return_date - timedelta(days=return_date.weekday())
+
+
+def grab_expiration_date():
+    return_date = date.today()
+    return return_date + timedelta(days=30)
 
 
 class InOutAction(models.Model):
@@ -174,3 +179,22 @@ class TTUserInfo(models.Model):
         else:
             self.status_text = 'n'
             self.status_time = None
+
+
+class TTReports(models.Model):
+    user = models.ForeignKey('users.CustomUser', on_delete=models.CASCADE, null=False, blank=False)
+    custom_name = models.CharField(max_length=250, default='', blank=True, null=True)
+    report_name = models.TextField(default='', blank=False, null=False)
+    folder = models.CharField(max_length=250, default='detailed', blank=False, null=False)
+    expiration_date = models.DateField(default=grab_begin_date, blank=False)
+    created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
+
+
+    def report_path(self):
+        date_time = str(datetime.now())
+        name = ''
+        if self.custom_name:
+            name = self.custom_name + '_' + date_time
+        else:
+            name = self.report_name + '_' + date_time
+        return '/'.join(['reports', str(self.user.id), self.folder, name + '.pdf'])

@@ -4,6 +4,7 @@ Django settings for daxApp project.
 
 import os
 import datetime
+import boto3
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -78,7 +79,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'daxApp.wsgi.application'
+ASGI_APPLICATION = 'daxApp.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -135,6 +136,15 @@ STATICFILES_DIRS = (
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 AUTH_USER_MODEL = 'users.CustomUser'  # Added by Dax 4/9/2020
+
+S3_ACCESS_KEY = 'AKIARTGAAP52Y4CTGFYS'
+S3_SECRET = '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'
+S3_CLIENT = boto3.client(
+    's3',
+    aws_access_key_id=S3_ACCESS_KEY,
+    aws_secret_access_key=S3_SECRET
+)
+S3_BUCKET_NAME = 'daxapp'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'  # Added by Dax to redirect a user to the home page once logged in 4/10/20

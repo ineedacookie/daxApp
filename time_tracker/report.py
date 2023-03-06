@@ -1,20 +1,35 @@
 import logging
+import os
+from io import BytesIO
 from datetime import timedelta, date, datetime
 from django.contrib import messages
 from django.utils import timezone
+from django.template.loader import get_template
 from string import capwords
 
 from django.shortcuts import render
 from users.models import CustomUser
 from middleware.timezone import get_timezone
+from xhtml2pdf import pisa
+from daxApp.settings import S3_CLIENT, S3_BUCKET_NAME
 
 from .forms import ReportsForm
-from .models import InOutAction, TTCompanyInfo, TTUserInfo
+from .models import InOutAction, TTCompanyInfo, TTUserInfo, TTReports
 from daxApp.encryption import encrypt_id, decrypt_id
 
 
 SECONDS_IN_HOUR = 3600
 
+from django.http import HttpResponse
+
+
+def generate_report(request):
+    # Get the template
+    template = get_template('report_template.html')
+
+    # Render the template with context
+    context = {'foo': 'bar'}
+    html = template.render(context)
 
 def generate_report(request, page, page_arguments, override_timezone=None):
     if not override_timezone and request.user.company.use_company_timezone:
@@ -49,6 +64,37 @@ def generate_report(request, page, page_arguments, override_timezone=None):
             page = form['report_type']
         else:
             page_arguments['form'] = original_form
+        template = get_template(page)
+        html = template.render(page_arguments)
+        pdf_file = BytesIO()
+        pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), pdf_file)
+        with open('test.pdf', 'wb') as out_file:
+            out_file.write(pdf_file.getvalue())
+        if form['report_type'] == 'time_tracker/reports/detailed_hours.html':
+            report_type = 'Detailed Hours Report'
+            report_folder = 'detailed'
+        else:
+            report_type = 'Unknown'
+            report_folder = 'unknown'
+
+        rep_obj = TTReports.objects.create(user=request.user,
+                                 report_name=report_type + ' ' + page_arguments['date-range'],
+                                           folder=report_folder)
+        rep_obj.save()
+        report_path = rep_obj.report_path()
+
+        pdf_file.seek(0)    # Reset the location to the beginning of the pdf_file
+        S3_CLIENT.upload_fileobj(pdf_file, S3_BUCKET_NAME, report_path)
+        presigned_url = S3_CLIENT.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={
+                'Bucket': S3_BUCKET_NAME,
+                'Key': report_path
+            },
+            ExpiresIn=60*5 #5 minutes
+        )
+        print(presigned_url)
+
         return render(request, page, page_arguments)
     else:
         logging.error("An invalid request to generate a report was received")
