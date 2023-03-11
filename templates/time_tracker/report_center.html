@@ -2,18 +2,205 @@
 {% load static %}
 {% block title %}DaxApp | Reports{% endblock %}
 {% block content %}
-    <form id="report_form" method="post">
-                {% csrf_token %}
-                <div class="card-header px-card bg-light border-bottom-0">
-                    <h5 class="modal-title">Add Action</h5>
-                </div>
-                    <div class="card-body">
-                        {{ form }}
-                    </div>
-                <div class="card-footer d-flex align-items-center bg-light border-0">
-                    <button class="btn btn-primary px-4" type="submit">Save</button>
-                </div>
-            </form>
+<form id="report_form" method="post">
+    {% csrf_token %}
+    <div class="card-header px-card bg-light border-bottom-0">
+        <h5 class="modal-title">Run Report</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <label for="{{ form.report_type.id_for_label }}">{{ form.report_type.label }}</label>
+            {{ form.report_type }}
+        </div>
+        <div class="row justify-content-center d-flex">
+            <div class="col-md-4 text-center">
+                <label for="{{ form.begin_date.id_for_label }}">{{ form.begin_date.label }}</label>
+                {{ form.begin_date }}
+            </div>
+            <div class="col-md-4 text-center">
+                <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
+                {{ form.end_date }}
+            </div>
+        </div>
+        <div class="row justify-content-center d-flex">
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary" id="previous-btn"><i class="fa-solid fa-arrow-left"></i><span> Prev</span></button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary" id="current-btn">Current</button>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary" id="next-btn"><span>Next </span><i class="fa-solid fa-arrow-right"></i> </button>
+            </div>
+        </div>
+        <div class="row">
+            <label for="{{ form.selected_employees_list.id_for_label }}">{{ form.selected_employees_list.label }}</label>
+            {{ form.selected_employees_list }}
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="{{ form.other_rounding.id_for_label }}">{{ form.other_rounding.label }}</label>
+                {{ form.other_rounding }}
+                <label for="{{ form.other_hours_format.id_for_label }}">{{ form.other_hours_format.label }}</label>
+                {{ form.other_hours_format }}
+            </div>
+            <div>
+                <label for="{{ form.other_font_size.id_for_label }}">{{ form.other_font_size.label }}</label>
+                {{ form.other_font_size }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="{{ form.display_clock_actions.id_for_label }}">{{ form.display_clock_actions.label }}</label>
+                {{ form.display_clock_actions }}
+                <label for="{{ form.display_day_totals.id_for_label }}">{{ form.display_day_totals.label }}</label>
+                {{ form.display_day_totals }}
+                <label for="{{ form.display_week_totals.id_for_label }}">{{ form.display_week_totals.label }}</label>
+                {{ form.display_week_totals }}
+                <label for="{{ form.display_employee_totals.id_for_label }}">{{ form.display_employee_totals.label }}</label>
+                {{ form.display_employee_totals }}
+                <label for="{{ form.display_employee_comments.id_for_label }}">{{ form.display_employee_comments.label }}</label>
+                {{ form.display_employee_comments }}
+            </div>
+            <div class="col">
+                <label for="{{ form.add_employee_signature_line.id_for_label }}">{{ form.add_employee_signature_line.label }}</label>
+                {{ form.add_employee_signature_line }}
+                <label for="{{ form.add_supervisor_signature_line.id_for_label }}">{{ form.add_supervisor_signature_line.label }}</label>
+                {{ form.add_supervisor_signature_line }}
+                <label for="{{ form.add_other_signature_line.id_for_label }}">{{ form.add_other_signature_line.label }}</label>
+                {{ form.add_other_signature_line }}
+                <label for="{{ form.new_page_for_each_employee.id_for_label }}">{{ form.new_page_for_each_employee.label }}</label>
+                {{ form.new_page_for_each_employee }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="{{ form.other_memo.id_for_label }}">{{ form.other_memo.label }}</label>
+                {{ form.other_memo }}
+                <label for="{{ form.other_space_on_right.id_for_label }}">{{ form.other_space_on_right.label }}</label>
+                {{ form.other_space_on_right }}
+            </div>
+        </div>
+    </div>
+    <div class="card-footer d-flex align-items-center bg-light border-0">
+        <button class="btn btn-primary px-4" type="submit">Save</button>
+    </div>
+</form>
+
+<script>
+var payPeriodType = "{{ tt_company_info.pay_period_type }}"
+$(document).ready(function() {
+  var initial_begin = $('#id_begin_date').val();
+  var initial_end = $('#id_end_date').val();
+  // Set the begin_date and end_date to the previous pay period
+  setPreviousPayPeriod();
+
+  // Add click event listeners to the buttons
+  $('#previous-btn').click(setPreviousPayPeriod);
+
+  $('#current-btn').click(function() {
+    // Reset the begin_date and end_date to their initial values
+    $('#id_begin_date').val(initial_begin);
+    $('#id_end_date').val(initial_end);
+  });
+
+  $('#next-btn').click(function() {
+    // Calculate the next pay period
+    var nextPayPeriod = calculatePayPeriod(1, payPeriodType, "next");
+
+    // Set the begin_date and end_date to the next pay period
+    $('#id_begin_date').val(nextPayPeriod.beginDate);
+    $('#id_end_date').val(nextPayPeriod.endDate);
+  });
+});
+
+function setPreviousPayPeriod() {
+  // Calculate the previous pay period
+  var previousPayPeriod = calculatePayPeriod(-1, payPeriodType, "previous");
+
+  // Set the begin_date and end_date to the previous pay period
+  $('#id_begin_date').val(previousPayPeriod.beginDate);
+  $('#id_end_date').val(previousPayPeriod.endDate);
+}
+
+function calculatePayPeriod(offset, payPeriodType, direction) {
+  var beginDate = parseUTCDate($('#id_begin_date').val());
+  var endDate = parseUTCDate($('#id_end_date').val());
+
+  // Calculate the begin_date and end_date based on the pay period type and offset
+  switch (payPeriodType) {
+    case 'w':
+      beginDate.setUTCDate(beginDate.getUTCDate() + (offset * 7));
+      endDate = new Date(beginDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 6);
+      break;
+    case 'b':
+      beginDate.setUTCDate(beginDate.getUTCDate() + (offset * 14));
+      endDate = new Date(beginDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 13);
+      break;
+    case 's':
+      if (beginDate.getUTCDate() < 16){
+        beginDate.setUTCDate(1);
+      } else {
+        beginDate.setUTCDate(16);
+      }
+      if (beginDate.getUTCDate() === 1) {
+        if (direction == "previous"){
+            beginDate.setUTCMonth(beginDate.getUTCMonth() - 1);
+        }
+        beginDate.setUTCDate(16);
+        endDate = new Date(beginDate);
+        endDate.setUTCMonth(endDate.getUTCMonth() + 1);
+        endDate.setUTCDate(0);
+      } else if (beginDate.getUTCDate() === 16) {
+        if (direction == "next"){
+            beginDate.setUTCMonth(beginDate.getUTCMonth() + 1);
+        }
+        beginDate.setUTCDate(1);
+        endDate = new Date(beginDate);
+        endDate.setUTCDate(15);
+      }
+      break;
+    case 'm':
+      beginDate.setUTCMonth(beginDate.getUTCMonth() + offset);
+      beginDate.setUTCDate(1);
+      endDate = new Date(beginDate);
+      endDate.setUTCMonth(endDate.getUTCMonth() + 1);
+      endDate.setUTCDate(0);
+      break;
+    default:
+      console.error('Invalid pay period type!');
+    }
+
+  // Format the begin_date and end_date as strings
+  var beginDateString = formatDate(beginDate);
+  var endDateString = formatDate(endDate);
+
+  // Return an object with the begin_date and end_date
+  return {
+    beginDate: beginDateString,
+    endDate: endDateString
+  };
+}
+
+function formatDate(date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function parseUTCDate(dateString) {
+  const dateArray = dateString.split('-');
+  const year = parseInt(dateArray[0]);
+  const month = parseInt(dateArray[1]) - 1; // month is zero-indexed
+  const day = parseInt(dateArray[2]);
+
+  return new Date(Date.UTC(year, month, day));
+}
+</script>
 {% endblock %}
 {% block beforeThemeScript %}
 {% endblock %}

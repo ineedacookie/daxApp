@@ -1,8 +1,10 @@
 from django import forms
 from django.forms import HiddenInput, ModelForm, CharField, Form, DateInput
 from users.models import CustomUser  # this is correct syntax
+from .models import TTCompanyInfo
 from daxApp.encryption import encrypt_id
 from string import capwords
+from .helpers import get_pay_period_dates
 
 
 from .models import InOutAction
@@ -55,6 +57,9 @@ class ReportsForm(Form):
         """Only pass user if the report is supposed to be restricted to an employee"""
         self.user = kwargs.pop('user', None)
         super(ReportsForm, self).__init__(*args, **kwargs)
+
+        company_info = TTCompanyInfo.objects.get(company=self.company)
+        self.fields['begin_date'].initial, self.fields['end_date'].initial = get_pay_period_dates(company_info.pay_period_type, company_info.period_begin_date)
 
         if not self.user:
             employee_list = CustomUser.objects.filter(company=self.company).order_by('last_name', 'first_name').values('id', 'full_name')

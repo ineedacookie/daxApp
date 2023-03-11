@@ -6,6 +6,7 @@ from users.models import CustomUser, Company
 from .forms import ReportsForm
 from .models import TTUserInfo, TTCompanyInfo, InOutAction
 from .report import Report, get_time_actions_list
+from .helpers import get_pay_period_dates
 from middleware.timezone import get_timezone
 
 
@@ -1058,3 +1059,59 @@ class TestReport(TestCase):
             result_employee = detailed_hours_report['employees'][index]
             del result_employee['weeks']
             self.assertEqual(answer_employee, result_employee)
+
+
+class TestPayPeriod(TestCase):
+    def test_weekly(self):
+        begin_date = date(2023, 3, 1)
+        expected_begin_date = date(2023, 3, 8)
+        expected_end_date = date(2023, 3, 14)
+        self.assertEqual(get_pay_period_dates('w', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2023, 2, 27)
+        expected_begin_date = date(2023, 3, 6)
+        expected_end_date = date(2023, 3, 12)
+        self.assertEqual(get_pay_period_dates('w', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2021, 3, 2)
+        expected_begin_date = date(2023, 3, 7)
+        expected_end_date = date(2023, 3, 13)
+        self.assertEqual(get_pay_period_dates('w', begin_date), (expected_begin_date, expected_end_date))
+
+    def test_biweekly(self):
+        begin_date = date(2023, 2, 28)
+        expected_begin_date = date(2023, 2, 28)
+        expected_end_date = date(2023, 3, 13)
+        self.assertEqual(get_pay_period_dates('b', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2021, 3, 2)
+        expected_begin_date = date(2023, 2, 28)
+        expected_end_date = date(2023, 3, 13)
+        self.assertEqual(get_pay_period_dates('b', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2021, 3, 8)
+        expected_begin_date = date(2023, 3, 6)
+        expected_end_date = date(2023, 3, 19)
+        self.assertEqual(get_pay_period_dates('b', begin_date), (expected_begin_date, expected_end_date))
+
+    def test_semimonthly(self):
+        begin_date = date(2023, 3, 1)
+        expected_begin_date = date(2023, 3, 1)
+        expected_end_date = date(2023, 3, 15)
+        self.assertEqual(get_pay_period_dates('s', begin_date), (expected_begin_date, expected_end_date))
+
+    def test_monthly(self):
+        begin_date = date(2023, 2, 1)
+        expected_begin_date = date(2023, 3, 1)
+        expected_end_date = date(2023, 3, 31)
+        self.assertEqual(get_pay_period_dates('m', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2023, 2, 5)
+        expected_begin_date = date(2023, 3, 5)
+        expected_end_date = date(2023, 4, 4)
+        self.assertEqual(get_pay_period_dates('m', begin_date), (expected_begin_date, expected_end_date))
+
+        begin_date = date(2019, 12, 5)
+        expected_begin_date = date(2023, 3, 5)
+        expected_end_date = date(2023, 4, 4)
+        self.assertEqual(get_pay_period_dates('m', begin_date), (expected_begin_date, expected_end_date))

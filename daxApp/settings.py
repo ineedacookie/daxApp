@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     # This is most likely due to the large amount of templates that it apparently uses internally.
     #
     # crispy __does not__ come with any "media files" (such as CSS).
-    'crispy_forms',
+    'crispy_forms',  # TODO remove crispy_forms
 
     'users',  # Custom Users dg 4/9/20
     'feedback', # Feedback Module dg 5/19/20

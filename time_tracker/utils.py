@@ -1,5 +1,5 @@
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from .models import InOutAction
 from middleware.timezone import get_timezone
 from json import dumps
@@ -153,4 +153,5 @@ def delete_event(user, action_id):
     if event.user.company == user.company:
         event.delete()
     return {'errors': [], 'Success': True}
+
 

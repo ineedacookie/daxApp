@@ -1,4 +1,3 @@
-import zoneinfo
 
 from django.utils import timezone
 
