@@ -21,7 +21,7 @@ from daxApp.encryption import encrypt_id, decrypt_id
 SECONDS_IN_HOUR = 3600
 
 from django.http import HttpResponse
-
+from asgiref.sync import async_to_sync
 
 def generate_report(request):
     # Get the template

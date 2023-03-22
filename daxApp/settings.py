@@ -26,19 +26,14 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'channels.layers',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # External library used to make django -> bootstrap integration easier. nf 5/15/2020
-    # According to the docs, they _highly_ recommend using the django cash loader on production environments.
-    # This is most likely due to the large amount of templates that it apparently uses internally.
-    #
-    # crispy __does not__ come with any "media files" (such as CSS).
-    'crispy_forms',  # TODO remove crispy_forms
 
     'users',  # Custom Users dg 4/9/20
     'feedback', # Feedback Module dg 5/19/20
@@ -80,6 +75,12 @@ TEMPLATES = [
 ]
 
 ASGI_APPLICATION = 'daxApp.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # TODO replace with something more robust
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
@@ -167,87 +168,87 @@ MAXIMUM_FILE_LOGS = 1024 * 1024 * 10  # 10 MB
 BACKUP_COUNT = 5
 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'standard': {
-            'format': '[%(levelname)s] %(asctime)s %(name)s: %(message)s'
-        },
-    },
-    'handlers': {
-        'default': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/default.log',
-            'maxBytes': MAXIMUM_FILE_LOGS,
-            'backupCount': BACKUP_COUNT,
-            'formatter': 'standard',
-        },
-        'request_nicepay_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/nicepay/%s.log' % DAY_NAME,
-            'maxBytes': MAXIMUM_FILE_LOGS,
-            'backupCount': BACKUP_COUNT,
-            'formatter': 'standard',
-        },
-        'request_debug_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/request_debug.log',
-            'maxBytes': MAXIMUM_FILE_LOGS,
-            'backupCount': BACKUP_COUNT,
-            'formatter': 'standard',
-        },
-        'request_error_handler': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/request_error.log',
-            'maxBytes': MAXIMUM_FILE_LOGS,
-            'backupCount': BACKUP_COUNT,
-            'formatter': 'standard',
-        },
-        'mail_admins_handler': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'email_backend': 'django.core.mail.backends.smtp.EmailBackend'
-        },
-    },
-    'root': {
-        'handlers': ['default', 'request_nicepay_handler'],
-        'level': 'DEBUG'
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': [
-                'request_nicepay_handler',
-                'request_debug_handler',
-                'request_error_handler',
-                'mail_admins_handler'
-            ],
-            'level': 'DEBUG',
-            'propagate': False
-        },
-    }
-}
-
-LOG_VIEWER_FILES_DIR = os.path.join(BASE_DIR, 'logs')
-LOG_VIEWER_MAX_READ_LINES = 1000  # total log lines will be read
-LOG_VIEWER_PAGE_LENGTH = 25       # total log lines per-page
-
-# Optionally you can set the next variables in order to customize the admin:
-
-LOG_VIEWER_FILE_LIST_TITLE = "Logs"
-LOG_VIEWER_FILE_LIST_STYLES = None
-
-MESSAGE_TAGS = {
-    messages.DEBUG: 'alert-info',
-    messages.INFO: 'alert-info',
-    messages.SUCCESS: 'alert-success',
-    messages.WARNING: 'alert-warning',
-    messages.ERROR: 'alert-danger',
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'standard': {
+#             'format': '[%(levelname)s] %(asctime)s %(name)s: %(message)s'
+#         },
+#     },
+#     'handlers': {
+#         'default': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': 'logs/default.log',
+#             'maxBytes': MAXIMUM_FILE_LOGS,
+#             'backupCount': BACKUP_COUNT,
+#             'formatter': 'standard',
+#         },
+#         'request_nicepay_handler': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': 'logs/nicepay/%s.log' % DAY_NAME,
+#             'maxBytes': MAXIMUM_FILE_LOGS,
+#             'backupCount': BACKUP_COUNT,
+#             'formatter': 'standard',
+#         },
+#         'request_debug_handler': {
+#             'level': 'DEBUG',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': 'logs/request_debug.log',
+#             'maxBytes': MAXIMUM_FILE_LOGS,
+#             'backupCount': BACKUP_COUNT,
+#             'formatter': 'standard',
+#         },
+#         'request_error_handler': {
+#             'level': 'ERROR',
+#             'class': 'logging.handlers.RotatingFileHandler',
+#             'filename': 'logs/request_error.log',
+#             'maxBytes': MAXIMUM_FILE_LOGS,
+#             'backupCount': BACKUP_COUNT,
+#             'formatter': 'standard',
+#         },
+#         'mail_admins_handler': {
+#             'level': 'ERROR',
+#             'class': 'django.utils.log.AdminEmailHandler',
+#             'email_backend': 'django.core.mail.backends.smtp.EmailBackend'
+#         },
+#     },
+#     'root': {
+#         'handlers': ['default', 'request_nicepay_handler'],
+#         'level': 'DEBUG'
+#     },
+#     'loggers': {
+#         'django.request': {
+#             'handlers': [
+#                 'request_nicepay_handler',
+#                 'request_debug_handler',
+#                 'request_error_handler',
+#                 'mail_admins_handler'
+#             ],
+#             'level': 'DEBUG',
+#             'propagate': False
+#         },
+#     }
+# }
+#
+# LOG_VIEWER_FILES_DIR = os.path.join(BASE_DIR, 'logs')
+# LOG_VIEWER_MAX_READ_LINES = 1000  # total log lines will be read
+# LOG_VIEWER_PAGE_LENGTH = 25       # total log lines per-page
+#
+# # Optionally you can set the next variables in order to customize the admin:
+#
+# LOG_VIEWER_FILE_LIST_TITLE = "Logs"
+# LOG_VIEWER_FILE_LIST_STYLES = None
+#
+# MESSAGE_TAGS = {
+#     messages.DEBUG: 'alert-info',
+#     messages.INFO: 'alert-info',
+#     messages.SUCCESS: 'alert-success',
+#     messages.WARNING: 'alert-warning',
+#     messages.ERROR: 'alert-danger',
+# }
 
 
 # Default primary key field type

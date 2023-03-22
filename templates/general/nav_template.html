@@ -390,4 +390,18 @@
             {% block content %}{% endblock %}
           </div>
         </div>
+<script>
+  const user_id = "{{ request.user.id }}";
+  const socket = new WebSocket(`ws://${window.location.host}/ws/`);
+
+  socket.onmessage = function(e){
+    const data = JSON.parse(e.data);
+    const message = JSON.parse(event.data);
+    console.log(message);
+  };
+
+  window.addEventListener("beforeunload", function() {
+    socket.close();
+  });
+</script>
 {% endblock %}

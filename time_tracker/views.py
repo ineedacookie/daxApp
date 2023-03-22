@@ -12,6 +12,8 @@ from daxApp.central_data import get_main_page_data
 from users.utils import get_selectable_employees
 from .forms import ReportsForm
 from .report import generate_report
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger("django.request")
 
@@ -19,6 +21,13 @@ logger = logging.getLogger("django.request")
 @login_required
 def simple_clock(request):
     if request.method == 'POST':
+        channel_layer = get_channel_layer()
+        group_name = 'user_' + str(request.user.id)
+        data = {
+                 'type': 'send_message',
+                 'message': 'I HAVE POWER'
+             }
+        async_to_sync(channel_layer.group_send)(group_name, data)
         action = request.POST.get('action', None)
         comment = request.POST.get('comment', '')
         if action:
