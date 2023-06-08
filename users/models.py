@@ -82,3 +82,10 @@ class CompanyConnection(models.Model):
     role = models.CharField(_('Role'), max_length=2, help_text="The role of the user within the company", default='e', choices=(('e', 'Employee'), ('c', 'Company Admin'), ('r', 'Restricted Admin')))
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
 
+
+class Notification(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=False)
+    type = models.CharField(_('Type'), max_length=50, blank=False, null=False, default='default')
+    message = models.TextField(blank=False, null=False)
+    link = models.TextField(blank=True, null=True)
+    created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)

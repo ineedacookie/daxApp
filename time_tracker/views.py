@@ -25,7 +25,12 @@ def simple_clock(request):
         group_name = 'user_' + str(request.user.id)
         data = {
                  'type': 'send_message',
-                 'message': 'I HAVE POWER'
+                 'data': {
+                     'type': 'message',
+                     'title': 'PING',
+                     'message': 'I am your Father',
+                     'actions': [{'text': 'Yes', 'color': '', 'link': 'junk'}]
+                 }
              }
         async_to_sync(channel_layer.group_send)(group_name, data)
         action = request.POST.get('action', None)

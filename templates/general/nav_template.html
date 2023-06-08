@@ -186,30 +186,9 @@
                         <div class="list-group-title border-bottom">NEW</div>
                         <div class="list-group-item">
                           <a class="notification notification-flush notification-unread" href="#!">
-                            <div class="notification-avatar">
-                              <div class="avatar avatar-2xl me-3">
-                                <img class="rounded-circle" src="{% static 'assets/img/team/1-thumb.png' %}" alt="" />
-
-                              </div>
-                            </div>
                             <div class="notification-body">
                               <p class="mb-1"><strong>Emma Watson</strong> replied to your comment : "Hello world 😍"</p>
-                              <span class="notification-time"><span class="me-2" role="img" aria-label="Emoji">💬</span>Just now</span>
-
-                            </div>
-                          </a>
-
-                        </div>
-                        <div class="list-group-item">
-                          <a class="notification notification-flush notification-unread" href="#!">
-                            <div class="notification-avatar">
-                              <div class="avatar avatar-2xl me-3">
-                                <div class="avatar-name rounded-circle"><span>AB</span></div>
-                              </div>
-                            </div>
-                            <div class="notification-body">
-                              <p class="mb-1"><strong>Albert Brooks</strong> reacted to <strong>Mia Khalifa's</strong> status</p>
-                              <span class="notification-time"><span class="me-2 fab fa-gratipay text-danger"></span>9hr</span>
+                              <span class="notification-time"></span>
 
                             </div>
                           </a>
@@ -218,12 +197,6 @@
                         <div class="list-group-title border-bottom">EARLIER</div>
                         <div class="list-group-item">
                           <a class="notification notification-flush" href="#!">
-                            <div class="notification-avatar">
-                              <div class="avatar avatar-2xl me-3">
-                                <img class="rounded-circle" src="{% static 'assets/img/icons/weather-sm.jpg' %}" alt="" />
-
-                              </div>
-                            </div>
                             <div class="notification-body">
                               <p class="mb-1">The forecast today shows a low of 20&#8451; in California. See today's weather.</p>
                               <span class="notification-time"><span class="me-2" role="img" aria-label="Emoji">🌤️</span>1d</span>
@@ -393,6 +366,125 @@
 <script>
   const user_id = "{{ request.user.id }}";
   const socket = new WebSocket(`ws://${window.location.host}/ws/`);
+
+  class NotificationManager {
+  constructor() {
+    this.notifications = [];
+  }
+
+  addNotification(notification) {
+    this.notifications.unshift(notification);
+
+    if (this.notifications.length > 20) {
+      this.notifications.pop();
+    }
+
+    this.updateHTML();
+    this.displayBrowserNotification(notification);
+    this.updateDropdownVisibility();
+    this.updateDropdownIndicator();
+  }
+
+  updateHTML() {
+    const container = document.querySelector('.list-group');
+    container.innerHTML = '';
+
+    const unreadNotifications = this.notifications.filter(notification => !notification.read);
+    const readNotifications = this.notifications.filter(notification => notification.read);
+
+    if (unreadNotifications.length > 0) {
+      const unreadSection = document.createElement('div');
+      unreadSection.className = 'list-group-title border-bottom';
+      unreadSection.textContent = 'NEW';
+      container.appendChild(unreadSection);
+
+      unreadNotifications.forEach(notification => {
+        const item = this.createNotificationItem(notification);
+        unreadSection.insertAdjacentHTML('afterend', item);
+      });
+    }
+
+    if (readNotifications.length > 0) {
+      const readSection = document.createElement('div');
+      readSection.className = 'list-group-title border-bottom';
+      readSection.textContent = 'EARLIER';
+      container.appendChild(readSection);
+
+      readNotifications.forEach(notification => {
+        const item = this.createNotificationItem(notification);
+        readSection.insertAdjacentHTML('afterend', item);
+      });
+    }
+  }
+
+  createNotificationItem(notification) {
+    const { title, message, time } = notification;
+    const item = `
+      <div class="list-group-item">
+        <a class="notification notification-flush ${notification.read ? '' : 'notification-unread'}" href="#!">
+          <div class="notification-body">
+            <p class="mb-1"><strong>${title}</strong> ${message}</p>
+            <span class="notification-time">${time}</span>
+          </div>
+        </a>
+      </div>
+    `;
+    return item;
+  }
+
+  handleSocketMessage(event) {
+    const message = JSON.parse(event.data);
+    if (message.type === 'notification') {
+      this.addNotification(message);
+    }
+  }
+
+  displayBrowserNotification(notification) {
+    if (!("Notification" in window)) {
+      // Browser doesn't support notifications
+      return;
+    }
+
+    if (Notification.permission === "granted") {
+      this.showNotification(notification);
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          this.showNotification(notification);
+        }
+      });
+    }
+  }
+
+  showNotification(notification) {
+    const { title, message } = notification;
+    const options = {
+      body: message
+    };
+
+    const notificationInstance = new Notification(title, options);
+
+    notificationInstance.onclick = () => {
+      // Handle notification click event, if needed
+    };
+  }
+
+  updateDropdownVisibility() {
+    const dropdown = document.querySelector('.dropdown-menu');
+    if (dropdown.classList.contains('show')) {
+      dropdown.classList.remove('show');
+    } else {
+      dropdown.innerHTML = '';
+      this.updateHTML();
+      dropdown.classList.add('show');
+    }
+  }
+
+  updateDropdownIndicator() {
+    const indicator = document.getElementById('navbarDropdownNotification');
+    indicator.classList.toggle('notification-indicator', this.notifications.some(notification => !notification.read));
+  }
+}
 
   socket.onmessage = function(e){
     const data = JSON.parse(e.data);
