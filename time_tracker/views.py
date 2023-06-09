@@ -21,18 +21,19 @@ logger = logging.getLogger("django.request")
 @login_required
 def simple_clock(request):
     if request.method == 'POST':
-        channel_layer = get_channel_layer()
-        group_name = 'user_' + str(request.user.id)
-        data = {
-                 'type': 'send_message',
-                 'data': {
-                     'type': 'message',
-                     'title': 'PING',
-                     'message': 'I am your Father',
-                     'actions': [{'text': 'Yes', 'color': '', 'link': 'junk'}]
-                 }
-             }
-        async_to_sync(channel_layer.group_send)(group_name, data)
+        # and example of how to send a message to a user.
+        # channel_layer = get_channel_layer()
+        # group_name = 'user_' + str(request.user.id)
+        # data = {
+        #          'type': 'send_message',
+        #          'data': {
+        #              'type': 'notification',
+        #              'title': 'PING',
+        #              'message': 'I am your Father',
+        #              'actions': [{'text': 'Yes', 'color': '', 'link': 'junk'}]
+        #          }
+        #      }
+        # async_to_sync(channel_layer.group_send)(group_name, data)
         action = request.POST.get('action', None)
         comment = request.POST.get('comment', '')
         if action:
