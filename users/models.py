@@ -34,14 +34,16 @@ class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_('Email'), unique=True)
     change_email = models.EmailField(null=True, blank=True, default=None)
-    first_name = models.CharField(_('First Name'), max_length=50, blank=False, null=True)
+    first_name = models.CharField(_('First Name'), max_length=50, blank=True, null=True)
     middle_name = models.CharField(_('Middle Name'), max_length=50, blank=True, null=True)
-    last_name = models.CharField(_('Last Name'), max_length=100, blank=False, null=True)
+    last_name = models.CharField(_('Last Name'), max_length=100, blank=True, null=True)
     timezone = TimeZoneField(choices_display='WITH_GMT_OFFSET', null=True, blank=True, use_pytz=True)
     verified = models.BooleanField(default=False, blank=True)
     created_date = models.DateField(_("Created Date"), auto_now_add=True, blank=True, null=True)
     updated_date = models.DateField(_("Updated Date"), auto_now=True, blank=True, null=True)
     full_name = models.CharField(_('Full Name'), max_length=200, blank=True, null=True, default=None)
+    active = models.BooleanField(_('Active'), blank=True, null=True, default=True)
+    marked_for_deletion = models.DateField(null=True, blank=True)     # added this to allow for a 30 day grace period before deleting the user perminately.
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

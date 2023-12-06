@@ -1,0 +1,33 @@
+<form autocomplete="off" id="addEmployeeForm" url="{% url 'add_employee' %}">
+                {% csrf_token %}
+                <div class="modal-header px-card bg-light border-bottom-0">
+                    <h5 class="modal-title">Add Employee</h5>
+                    <button aria-label="Close" class="btn-close me-n1" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body p-card">
+                    <div class="mb-3">
+                        <label class="fs-0" for="eventTitle">Title</label>
+                        <select class="form-select js-choice" id="eventTitle" size="1" name="title" required="required" data-options='{"removeItemButton":true}'>
+                          <option>Clocked In</option>
+                          <option>Break</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control datetimepicker" data-options='{"allowInput":"true", "static":"true","enableTime":"true","dateFormat":"G:iK  M d, Y"}' id="eventStartDate" name="startDate"
+                               placeholder="Start" required="required"
+                               type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control datetimepicker" data-options='{"allowInput":"true", "static":"true","enableTime":"true","dateFormat":"G:iK  M d, Y"}' id="eventEndDate" name="endDate"
+                               placeholder="End"
+                               type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fs-0" for="eventDescription">Comment</label>
+                        <textarea class="form-control" id="eventDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
+                    <button class="btn btn-primary px-4" type="submit">Save</button>
+                </div>
+            </form>

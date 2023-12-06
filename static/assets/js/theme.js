@@ -12935,6 +12935,30 @@ var weeklySalesInit = function weeklySalesInit() {
     echartSetOption(chart, userOptions, getDefaultOptions);
   }
 };
+
+function deleteEmployee(employeeId) {
+        // Prompt the user for confirmation
+        var confirmation = confirm("Deleting the employee will delete all actions and information tied to the employee. Are you sure you want to proceed?");
+
+        // If the user confirms deletion
+        if (confirmation) {
+            // Send an AJAX request to delete the employee
+            $.ajax({
+                type: "POST",
+                url: "/delete-employee/",  // Specify the URL for deleting the employee on the server
+                data: {
+                    employee_id: employeeId
+                },
+                success: function(response) {
+                    // If the deletion is successful, remove the row from the table
+                    if (response.success) {
+                        var row = $("#employee-row-" + employeeId);
+                        row.remove();
+                    }
+                }
+            });
+        }
+    }
 /* -------------------------------------------------------------------------- */
 
 /*                            Theme Initialization                            */

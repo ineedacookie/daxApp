@@ -1,0 +1,62 @@
+{% load tz %}
+<div class="col-lg-4">
+    <div class="card mb-3" id="employee_status_table_widget">
+        <div class="card-header">
+            <div class="col-auto align-self-center">
+                <h5 class="mb-0">Snapshot</h5>
+            </div>
+        </div>
+        <div class="card-body pt-0 px-0">
+            <div data-list='{"valueNames":["name","status","time"],"page":20,"pagination":true}'
+                 id="employee_status_table">
+                <div class="row justify-content-end g-0">
+                    <div class="col-auto col-sm-5 mb-3">
+                        <form>
+                            <div class="input-group">
+                                <input aria-label="search" class="form-control form-control-sm shadow-none search"
+                                       placeholder="Search..." type="search"/>
+                                <div class="input-group-text bg-transparent"><span
+                                        class="fa fa-search fs--1 text-600"></span></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="table-responsive scrollbar">
+                    <table class="table table-sm table-striped fs--1 mb-0 overflow-hidden">
+                        <thead class="bg-200 text-900">
+                        <tr>
+                            <th class="sort pe-1 align-middle" data-sort="name">Name</th>
+                            <th class="sort pe-1 align-middle" data-sort="status">Status</th>
+                            <th class="sort pe-1 align-middle" data-sort="time">Time</th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+                        {% if tt_employees %}
+                        {% for tt_employee in tt_employees %}
+                        <tr>
+                            <td class="name align-middle py-2">{{ tt_employee.name }}</td>
+                            <td class="status align-middle py-2">{{ tt_employee.status }}</td>
+                            <td class="time align-middle py-2">{{ tt_employee.time|localtime }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td class="name align-middle py-2">No employees</td>
+                            <td class="status align-middle py-2"></td>
+                            <td class="time align-middle py-2"></td>
+                        </tr>
+                        {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-center mt-3">
+                    <button class="btn btn-sm btn-falcon-default me-1" data-list-pagination="prev" title="Previous"
+                            type="button"><span class="fas fa-chevron-left"></span></button>
+                    <ul class="pagination mb-0"></ul>
+                    <button class="btn btn-sm btn-falcon-default ms-1" data-list-pagination="next" title="Next"
+                            type="button"><span class="fas fa-chevron-right"> </span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

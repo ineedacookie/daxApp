@@ -6,14 +6,14 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from daxApp.settings import ENCRYPT_CODE
 
 # Generate a salt
-salt = os.urandom(16)
+salt = b'fndmentalSaltIsUsed'
 
 
 kdf = PBKDF2HMAC(
     algorithm=hashes.SHA256(),
     length=32,
     salt=salt,
-    iterations=100000
+    iterations=4    # 10000 is recommend for non sensitive data, but considering that I am not sharing the key outside of the application at the moment I am not concerned about someone breaking it.
 )
 key = base64.urlsafe_b64encode(kdf.derive(ENCRYPT_CODE))
 FERNET = Fernet(key)

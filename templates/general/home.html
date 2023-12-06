@@ -5,4 +5,9 @@
 <div class="row g-3 mb-3">
   {% include "time_tracker/widgets/simple_clock_in.html" %}
   </div>
+{% if tt_employees %}
+<div class="row mb-3">
+  {% include "time_tracker/widgets/employee_status_list.html" %}
+  </div>
+{% endif %}
 {% endblock %}

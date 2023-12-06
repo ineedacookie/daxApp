@@ -44,7 +44,7 @@ def home(request):
         return redirect('/io_admin')
     else:
         page = 'general/home.html'
-        page_arguments = get_main_page_data(request.user)
+        page_arguments = get_main_page_data(request.user, get_tt_employees=True)
         return render(request, page, page_arguments)  # fill the {} with arguments
 
 
@@ -85,6 +85,28 @@ def register_account(request):
     if not form:
         page_arguments['form'] = RegisterUserForm()
     return render(request, page, page_arguments)
+
+
+@login_required
+def manage_employees(request):
+    """Checks whether the user is a timeclick employee, an employee, or an admin"""
+    if request.user.is_staff:
+        return redirect('/io_admin')
+    else:
+        page = 'general/employees.html'
+        page_arguments = get_main_page_data(request.user, get_employee_list=True)
+        return render(request, page, page_arguments)
+
+
+@login_required
+def add_employee(request):
+    """Checks whether the user is a timeclick employee, an employee, or an admin"""
+    if request.user.is_staff:
+        return redirect('/io_admin')
+    else:
+        page = 'general/employees.html'
+        page_arguments = get_main_page_data(request.user)
+        return render(request, page, page_arguments)
 
 
 @login_required

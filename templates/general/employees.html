@@ -1,0 +1,75 @@
+{% extends "general/nav_template.html" %}
+{% load static %}
+{% block title %}DaxApp | Employees{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  {% include "general/widget/employee_list.html" %}
+  </div>
+<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border">
+            <form autocomplete="off" id="addEmployeeForm" url="">
+                {% csrf_token %}
+                <div class="modal-header px-card bg-light border-bottom-0">
+                    <h5 class="modal-title">Invite Employees</h5>
+                    <button aria-label="Close" class="btn-close me-n1" data-bs-dismiss="modal" type="button"></button>
+                </div>
+                <div class="modal-body p-card">
+                    <div class="mb-3">
+                        <label class="fs-0" for="emails">Emails</label>
+                        <select class="form-select select2" id="emails" size="1" name="emails" required="required" multiple="multiple"></select>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
+                    <button class="btn btn-primary px-4" type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        $('#addEmployeeModal').on('hidden.bs.modal', function(){
+            var employee_form = document.getElementById('addEmployeeForm');
+            employee_form.reset();
+            employee_form.getElementsByClassName('modal-title')[0].innerText = "Add Employee";
+        });
+    });
+    $(document).ready(function() {
+    $('#emails').select2({
+      tags: true,
+      dropdownCssClass: "no-dropdown", // Add a custom CSS class to disable the dropdown
+      tokenSeparators: [',', ' '], // Specify the separators to trigger tag creation
+      createTag: function(params) {
+            var term = $.trim(params.term);
+
+            // Check if the entered value is a valid email address
+            if (term.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/)) {
+              return {
+                id: term,
+                text: term,
+                newTag: true
+              };
+            }
+
+            return null;
+          }
+
+    });
+
+    $('.select2').on('select2:opening', function(e) {
+      // Prevent the dropdown from opening
+      e.preventDefault();
+    });
+  });
+
+  function open_employee_modal() {
+        $('#addEmployeeModal').modal('show');
+    }
+</script>
+<style>
+  .no-dropdown + .select2-container .select2-selection {
+    pointer-events: none; /* Disable pointer events */
+  }
+</style>
+{% endblock %}
