@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
-                    <button class="btn btn-primary px-4" type="submit">Save</button>
+                    <button class="btn btn-primary px-4" type="submit">Send Invites</button>
                 </div>
             </form>
         </div>
@@ -56,11 +56,6 @@
           }
 
     });
-
-    $('.select2').on('select2:opening', function(e) {
-      // Prevent the dropdown from opening
-      e.preventDefault();
-    });
   });
 
   function open_employee_modal() {
@@ -70,6 +65,7 @@
 <style>
   .no-dropdown + .select2-container .select2-selection {
     pointer-events: none; /* Disable pointer events */
+    display: none !important;
   }
 </style>
 {% endblock %}
