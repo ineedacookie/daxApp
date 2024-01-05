@@ -6,6 +6,8 @@ from . import consumers
 urlpatterns = [
     re_path(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/$', views.activate_account,
             name='activate'),
+    re_path(r'^invited/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/$', views.invited_account,
+            name='activate'),
 ]
 
 urlpatterns += [
@@ -15,6 +17,7 @@ urlpatterns += [
     path('company_settings/', views.company_settings, name="company_settings"),
     path('selectable_employees', views.selectable_employees, name="selectable_employees"),
     path('employees/', views.manage_employees, name="employees"),
+    path('invite_employees/', views.invite_employees, name="invite_employees"),
     # path('dashboard/', views.dashboard, name="dashboard"),
     # path('admin/company_settings/', views.company_settings, name="company_settings"),
     # path('admin/create_employee/', views.create_employee, name="create_employee"),

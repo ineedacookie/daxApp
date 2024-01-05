@@ -7,6 +7,9 @@ from .tokens import account_activation_token
 from daxApp.encryption import encrypt_id, decrypt_id
 from django.core.paginator import Paginator
 from .models import CustomUser
+from django.contrib.sites.shortcuts import get_current_site
+from daxApp.settings import DOMAIN
+import logging
 
 
 def check_employee_form(current_site, form, initial_email, send=True):
@@ -62,3 +65,40 @@ def get_selectable_employees(user, page=1, query=''):
     more = page * 30 < p.count
 
     return return_list, more
+
+
+def send_email_with_link(user, request=None, type='activation'):
+    if request is None:
+        current_site = DOMAIN
+    else:
+        current_site = get_current_site(request).domain
+
+    if type == 'activation':
+        mail_subject = 'Activate Account.'
+        html_file = 'email/acc_active_email.html'
+        url = f'http://{current_site}/activate/'
+    elif type == 'invitation':
+        mail_subject = 'Activate Account.'
+        html_file = 'email/acc_invite_email.html'
+        url = f'http://{current_site}/invited/'
+    else:
+        logging.error("send_email_with_link was passed a type it wasn't expecting. Type:" + str(type))
+        return
+
+    message = render_to_string(html_file, {
+        'user': user,
+        'domain': current_site,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': account_activation_token.make_token(user),
+    })
+    to_email = user.email
+    print(url + urlsafe_base64_encode(
+        force_bytes(user.pk)) + '/' + account_activation_token.make_token(user))
+
+    # send_mail(
+    #     mail_subject,
+    #     message,
+    #     settings.DEFAULT_FROM_EMAIL,
+    #     [to_email],
+    #     fail_silently=False,
+    # )

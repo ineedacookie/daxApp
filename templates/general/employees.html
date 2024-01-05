@@ -8,7 +8,7 @@
 <div class="modal fade" id="addEmployeeModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content border">
-            <form autocomplete="off" id="addEmployeeForm" url="">
+            <form autocomplete="off" id="inviteEmployeeForm">
                 {% csrf_token %}
                 <div class="modal-header px-card bg-light border-bottom-0">
                     <h5 class="modal-title">Invite Employees</h5>
@@ -16,12 +16,13 @@
                 </div>
                 <div class="modal-body p-card">
                     <div class="mb-3">
+                        <div id="invite_error_message" class="text-danger"></div>
                         <label class="fs-0" for="emails">Emails</label>
                         <select class="form-select select2" id="emails" size="1" name="emails" required="required" multiple="multiple"></select>
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
-                    <button class="btn btn-primary px-4" type="submit">Send Invites</button>
+                    <button class="btn btn-primary px-4" onclick="invite_employees_submit_form('{% url 'invite_employees' %}', [], '#inviteEmployeeForm')">Send Invites</button>
                 </div>
             </form>
         </div>

@@ -1,0 +1,6 @@
+{% autoescape off %}
+Hi {{ user.first_name }},
+You have been invited to join {{ user.company.name }}'s time tracking portal.
+Click the link below to activate your account.
+http://{{ domain }}{% url 'invited' uidb64=uid token=token %}
+{% endautoescape %}

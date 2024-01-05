@@ -23,6 +23,6 @@ def get_main_page_data(user, get_tt_employees=False, get_employee_list=False):
         if get_employee_list:
             employees = CustomUser.objects.filter(company=user.company).exclude(pk=user.pk).order_by('first_name')
             for i in employees:
-                arguments['employees'].append({'pk': encrypt_id(i.pk), 'name': i.user.full_name, 'email': i.email, 'active': i.active})
+                arguments['employees'].append({'pk': encrypt_id(i.pk), 'name': i.full_name, 'email': i.email, 'active': i.active})
 
     return arguments

@@ -62,6 +62,12 @@ class CustomUser(AbstractUser):
             company = Company.objects.create()
             CompanyConnection.objects.create(company=company, user=self, role='c')
             self.company = company
+        try:
+            company_connection = CompanyConnection.objects.get(user=self)
+        except:
+            company_connection = None
+        if self.company and company_connection is not None:
+            CompanyConnection.objects.create(company=company, user=self, role='e')
         if created:
             TTUserInfo.objects.create(user=self)
 

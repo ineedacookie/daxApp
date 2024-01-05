@@ -1,7 +1,8 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm, PasswordChangeForm
-from django.forms import EmailField, ModelForm, BooleanField
+from django.forms import EmailField, ModelForm, BooleanField, CharField, PasswordInput
 
 from .models import CustomUser, Company, CompanyConnection
+from .utils import send_email_with_link
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -70,3 +71,49 @@ class RegisterUserForm(ModelForm):
             'last_name',
             'email'
         )
+
+
+class InviteEmployeesForm(ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'email',
+            'company'
+        )
+
+    def save(self, commit=False):
+        instance = super().save(commit=True)
+
+        if not commit:
+            # Send invitation email after saving the user
+            send_email_with_link(instance, type='invitation')
+
+        return instance
+
+
+class InviteCombinedForm(ModelForm, AdminPasswordChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ('first_name', 'middle_name', 'last_name', 'timezone')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add the fields from AdminPasswordChangeForm to this form
+        self.fields.update(AdminPasswordChangeForm.base_fields)
+        self.initial.update(AdminPasswordChangeForm(kwargs.get('user')).initial)
+
+        for name in ["password1", "password2"]:
+            self.fields[name].widget.attrs["class"] = "form-control"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        AdminPasswordChangeForm.clean_password2(self)
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Save the initial info fields
+        instance = super().save(commit=False)
+        instance.set_password(self.cleaned_data["password1"])
+
+        if commit:
+            instance.save()
